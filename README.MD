@@ -45,3 +45,11 @@ brew install mono-libgdiplus
 ```
 
 Likely for your Linux distro, a similar 'apt', 'yum' or other package installer should be able to install the libgdiplus component.
+
+If you have the .NET Core SDK installed on your machine, you can also build just by changing directory to the location of the .SLN file and running dotnet:
+
+```
+dotnet build -c Release
+```
+
+This will build the release configuration of the application.
