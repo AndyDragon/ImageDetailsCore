@@ -1,0 +1,45 @@
+﻿{
+  "lenses": [
+    { "source": "70-200mm f/2.8",                                   "display": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N" },
+    { "source": "TAMRON SP 70-200mm F2.8 Di A001N",                 "display": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N" },
+    { "source": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025E",      "display": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N" },
+    { "source": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N",      "display": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N" },
+    { "source": "70.0-200.0 mm f/2.8",                              "display": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N" },
+
+    { "source": "NIKKOR Z 24-70mm f/4 S",                           "display": "NIKKOR Z 24-70mm f/4 S" },
+
+    { "source": "70.0-300.0 mm f/4.0-5.6",                          "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A17N" },
+    { "source": "TAMRON 70-300mm F4-5.6 Di A17N",                   "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A17N" },
+    { "source": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A17N",      "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A17N" },
+    { "source": "Nikon DX 18-200mm f3.5-5.6 G ED IF",               "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A17N" },
+
+    { "source": "150.0-600.0 mm f/5.0-6.3",                         "display": "TAMRON SP 150-600mm f/5-6.3 Di VC USD G2 A022N" },
+    { "source": "TAMRON SP 150-600mm F5-6.3 Di VC USD A011N",       "display": "TAMRON SP 150-600mm f/5-6.3 Di VC USD G2 A022N" },
+    { "source": "TAMRON SP 150-600mm f/5-6.3 Di VC USD G2 A022N",   "display": "TAMRON SP 150-600mm f/5-6.3 Di VC USD G2 A022N" },
+
+    { "source": "20.0 mm f/1.4",                                    "display": "SIGMA 20mm f/1.4 DG HSM A015" },
+    { "source": "SIGMA 20mm F1.4 DG HSM A015",                      "display": "SIGMA 20mm f/1.4 DG HSM A015" },
+    { "source": "SIGMA 20mm f/1.4 DG HSM A015",                     "display": "SIGMA 20mm f/1.4 DG HSM A015" },
+
+    { "source": "18.0-55.0 mm f/3.5-5.6",                           "display": "NIKKOR AF-P DX 18-55mm f/3.5-5.6G VR" },
+    { "source": "Nikon AF-P DX Nikkor 18-55mm f/3.5-5.6G",          "display": "NIKKOR AF-P DX 18-55mm f/3.5-5.6G VR" },
+    { "source": "Nikon AF-P DX NIKKOR 18-55mm F3.5-5.6G VR",        "display": "NIKKOR AF-P DX 18-55mm f/3.5-5.6G VR" },
+    { "source": "NIKKOR AF-P DX 18-55mm f/3.5-5.6G VR",             "display": "NIKKOR AF-P DX 18-55mm f/3.5-5.6G VR" },
+    { "source": "Nikon FX 24-70mm f/3.5-5.6",                       "display": "NIKKOR AF-P DX 18-55mm f/3.5-5.6G VR" },
+    { "source": "Nikon FX 24-70mm f2.8 G ED",                       "display": "NIKKOR AF-P DX 18-55mm f/3.5-5.6G VR" },
+
+    { "source": "50.0 mm f/1.8",                                    "display": "NIKKOR AF-S FX 50mm f/1.8G" },
+    { "source": "Nikon AF-S NIKKOR 50mm f1.8G",                     "display": "NIKKOR AF-S FX 50mm f/1.8G" },
+    { "source": "NIKKOR AF-S FX 50mm f/1.8G",                       "display": "NIKKOR AF-S FX 50mm f/1.8G"},
+
+    { "source": "18.0-105.0 mm f/3.5-5.6",                          "display": "NIKKOR AF-S DX 18-105mm f/3.5-5.6G ED VR" },
+    { "source": "Nikon AF-S DX NIKKOR 18-105mm f3.5-5.6G ED VR",    "display": "NIKKOR AF-S DX 18-105mm f/3.5-5.6G ED VR" },
+    { "source": "NIKKOR AF-S DX 18-105mm f/3.5-5.6G ED VR",         "display": "NIKKOR AF-S DX 18-105mm f/3.5-5.6G ED VR" },
+
+    { "source": "14.0-45.0 mm f/3.5-5.6",                           "display": "OLYMPUS Zuiko 14-45mm f/3.5-5.6" },
+    { "source": "Olympus Zuiko Digital 14-45mm f/3.5-5.6",          "display": "OLYMPUS Zuiko 14-45mm f/3.5-5.6" },
+
+    { "source": "40.0-150.0 mm f/3.5-4.5",                           "display": "OLYMPUS Zuiko 40-150mm f/3.5-4.5" },
+    { "source": "Olympus Zuiko Digital 40-150mm f/3.5-4.5",          "display": "OLYMPUS Zuiko 40-150mm f/3.5-4.5" }
+  ]
+}
