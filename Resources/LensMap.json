@@ -1,17 +1,22 @@
 ﻿{
   "lenses": [
+    { "source": "NIKKOR Z 24-70mm f/4 S",                           "display": "NIKKOR Z 24-70mm f/4 S" },
+
     { "source": "70-200mm f/2.8",                                   "display": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N" },
+    { "source": "70.0-200.0 mm f/2.8",                              "display": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N" },
+    { "source": "TAMRON SP 70-200mm F_2.8 Di A001N",                "display": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N" },
     { "source": "TAMRON SP 70-200mm F2.8 Di A001N",                 "display": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N" },
     { "source": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025E",      "display": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N" },
     { "source": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N",      "display": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N" },
-    { "source": "70.0-200.0 mm f/2.8",                              "display": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N" },
 
-    { "source": "NIKKOR Z 24-70mm f/4 S",                           "display": "NIKKOR Z 24-70mm f/4 S" },
+    { "source": "15.0-30.0 mm f/2.8",                               "display": "TAMRON SP 15-30mm f/2.8 Di VC USD G2 A041N" },
+    { "source": "TAMRON SP 15-30mm F_2.8 Di VC USD G2 A041N",       "display": "TAMRON SP 15-30mm f/2.8 Di VC USD G2 A041N" },
+    { "source": "TAMRON SP 15-30mm f/2.8 Di VC USD G2 A041N",       "display": "TAMRON SP 15-30mm f/2.8 Di VC USD G2 A041N" },
 
-    { "source": "70.0-300.0 mm f/4.0-5.6",                          "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A17N" },
-    { "source": "TAMRON 70-300mm F4-5.6 Di A17N",                   "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A17N" },
-    { "source": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A17N",      "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A17N" },
-    { "source": "Nikon DX 18-200mm f3.5-5.6 G ED IF",               "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A17N" },
+    { "source": "70.0-300.0 mm f/4.0-5.6",                          "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A017N" },
+    { "source": "TAMRON 70-300mm F4-5.6 Di A17N",                   "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A017N" },
+    { "source": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A17N",      "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A017N" },
+    { "source": "Nikon DX 18-200mm f3.5-5.6 G ED IF",               "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A017N" },
 
     { "source": "150.0-600.0 mm f/5.0-6.3",                         "display": "TAMRON SP 150-600mm f/5-6.3 Di VC USD G2 A022N" },
     { "source": "TAMRON SP 150-600mm F5-6.3 Di VC USD A011N",       "display": "TAMRON SP 150-600mm f/5-6.3 Di VC USD G2 A022N" },
