@@ -69,7 +69,7 @@ On Windows, you can drop files or folders right on the ImageDetailsCore.exe file
 
 ## Dependencies
 
-The application is currently using System.Drawing which means that the libgdiplus library is required for Linux and MacOS.
+The application is currently using `System.Drawing` which means that the `libgdiplus` library is required for Linux and MacOS.
 
 For the MacOS, I used homebrew to install the library:
 
@@ -77,7 +77,9 @@ For the MacOS, I used homebrew to install the library:
 brew install mono-libgdiplus
 ```
 
-Likely for your Linux distro, a similar 'apt', 'yum' or other package installer should be able to install the libgdiplus component.
+Likely for your Linux distro, a similar `apt`, `yum` or other package installer should be able to install the libgdiplus component.
+
+The tool requires two fonts to be installed.  `Arial` and `Candara`. If you would prefer different fonts, you will need to grab the code and alter the font names in the `DrawValue` method. The `Arial` font is used for the value labels and the `Candara` font is used for the value itself. Both were installed and available on MacOS and Windows, but they may have come with Office or the OS itself, not sure.
 
 ## Building
 
