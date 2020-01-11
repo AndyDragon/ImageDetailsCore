@@ -22,13 +22,51 @@ The information shown includes the camera, lens, focal length, ISO, shutter spee
 | Date            | SubIFD/Date/Time Original                       |
 | Artist          | IFD0/Artist or SubIFD/Artist                    |
 
-Additionally, the Camera and Lens properties are then mapped from a source string to a finalized string using the Resources/Options.json file. This file currently has the data I use for various cameras and lenses to produce cleaner text. Without changing the source code or recompiling, mappings can be added, removed or modified in the file to do the same for your equipment. The code will emit a warning whenever a camera or lens string is not found. To skip the warning output, change the 'warnMissingCamera' and 'warnMissingLens' options to `false`.
+Additionally, the Camera and Lens properties are then mapped from a source string to a finalized string using the Resources/Options.json file. This file currently has the data I use for various cameras and lenses to produce cleaner text. Without changing the source code or recompiling, mappings can be added, removed or modified in the file to do the same for your equipment. The code can emit a warning whenever a camera or lens string is not found. To skip the warning output, change the `warnMissingCamera` and `warnMissingLens` options to `false`. To enable the warning, change the values to `true`.
 
 If the camera (Model EXIF tag) is not found in the tags, the badge will not be created and an error message will be emitted.
 
 ## Options file
 
 The Resources/Options.json file contains a few options for the tool.
+
+> `theme`
+
+String value for the badge theme to change the colors of the badge.
+
+Current themes are (any other value will revert to the `black` theme):
+
+### `black`
+
+![alt text](docs/Sample_black.png "Simple image badge with black theme")
+
+### `white`
+
+![alt text](docs/Sample_white.png "Simple image badge with white theme")
+
+### `dark`
+
+![alt text](docs/Sample_dark.png "Simple image badge with dark theme")
+
+### `light`
+
+![alt text](docs/Sample_light.png "Simple image badge with light theme")
+
+### `nikon`
+
+![alt text](docs/Sample_nikon.png "Simple image badge with nikon theme")
+
+### `canon`
+
+![alt text](docs/Sample_canon.png "Simple image badge with canon theme")
+
+### `olympus`
+
+![alt text](docs/Sample_olympus.png "Simple image badge with olympus theme")
+
+> `useScaling`
+
+Boolean flags to use scaled images for better quality output (rendering will be done at 4x and final output will be 2x normal when this is set to `true`).
 
 > `warnMissingCamera` and `warnMissingLens`
 
@@ -56,6 +94,10 @@ Two arrays of mapping objects with a `source` string and a `display` string. Whe
 ```
 
 If the camera is `NIKON Z 7`, the badge will show `NIKON Z7` instead. If the lens is `24-70 mm F_4.0`, the badge will show `NIKKOR Z 24-70mm f/4 S`.
+
+## User option files
+
+To separate the option files and provide a stable base file, the code will now look in the user's home folder for a file named `.imagedetailscore_options.json` before it looks for the `Options.json` file in the application's folder first. If that file is found, it will use that file, otherwise the default `Options.json` file will be used. This allows users to keep their own options file separate from the source code and build to allow easier customization. To add a custom options file to the repository, copy the `Options.json` file to a file under the `Custom Options` folder using the pattern *{username}*`.imagedetailscore_options.json`
 
 ## Using the application
 
