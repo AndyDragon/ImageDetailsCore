@@ -27,6 +27,9 @@ SOFTWARE.
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -34,12 +37,24 @@ using Newtonsoft.Json;
 
 namespace ImageDetailsCore
 {
+    class ThemeData
+    {
+        public Brush BackgroundBrush { get; set; }
+        public Brush ForegroundBrush { get; set; }
+        public Brush CameraForegroundBrush { get; set; }
+        public Brush LabelBrush { get; set; }
+        public Brush BorderBrush { get; set; }
+        public string ImageLocation { get; set; }
+    }
+
     class Options
     {
         public bool WarnMissingCamera { get; set; }
         public bool WarnMissingLens { get; set; }
         public bool RecursiveFolders { get; set; }
+        public string Theme { get; set; }
         public IList<string> FolderSearchExtensions { get; set; }
+        public bool UseScaling { get; set; }
         public IList<MapValue> Cameras { get; set; }
         public IList<MapValue> Lenses { get; set; }
     }
@@ -52,10 +67,110 @@ namespace ImageDetailsCore
 
     class Program
     {
+        static readonly Dictionary<string, ThemeData> themeData = new Dictionary<string, ThemeData>
+        {
+            {
+                "black",
+                new ThemeData
+                {
+                    BackgroundBrush = Brushes.Black,
+                    ForegroundBrush = Brushes.White,
+                    CameraForegroundBrush = Brushes.White,
+                    LabelBrush = new SolidBrush(Color.FromArgb(128, 128, 128)),
+                    BorderBrush = Brushes.White,
+                    ImageLocation = "Resources/Themes/black",
+                }
+            },
+            {
+                "white",
+                new ThemeData
+                {
+                    BackgroundBrush = Brushes.White,
+                    ForegroundBrush = Brushes.Black,
+                    LabelBrush = new SolidBrush(Color.FromArgb(128, 128, 128)),
+                    BorderBrush = Brushes.Black,
+                    ImageLocation = "Resources/Themes/white",
+                }
+            },
+            {
+                "dark",
+                new ThemeData
+                {
+                    BackgroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
+                    ForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
+                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
+                    LabelBrush = new SolidBrush(Color.FromArgb(128, 128, 128)),
+                    BorderBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
+                    ImageLocation = "Resources/Themes/dark",
+                }
+            },
+            {
+                "light",
+                new ThemeData
+                {
+                    BackgroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
+                    ForegroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
+                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
+                    LabelBrush = new SolidBrush(Color.FromArgb(128, 128, 128)),
+                    BorderBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
+                    ImageLocation = "Resources/Themes/light",
+                }
+            },
+            {
+                "nikon",
+                new ThemeData
+                {
+                    BackgroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
+                    ForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
+                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(215, 0, 0)),
+                    LabelBrush = new SolidBrush(Color.FromArgb(113, 113, 0)),
+                    BorderBrush = new SolidBrush(Color.FromArgb(226, 226, 0)),
+                    ImageLocation = "Resources/Themes/dark",
+                }
+            },
+            {
+                "canon",
+                new ThemeData
+                {
+                    BackgroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
+                    ForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
+                    CameraForegroundBrush = new SolidBrush(Color.White),
+                    LabelBrush = new SolidBrush(Color.FromArgb(113, 6, 6)),
+                    BorderBrush = new SolidBrush(Color.FromArgb(215, 11, 11)),
+                    ImageLocation = "Resources/Themes/dark",
+                }
+            },
+            {
+                "olympus",
+                new ThemeData
+                {
+                    BackgroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
+                    ForegroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
+                    CameraForegroundBrush = new SolidBrush(Color.Black),
+                    LabelBrush = new SolidBrush(Color.FromArgb(3, 3, 64)),
+                    BorderBrush = new SolidBrush(Color.FromArgb(6, 6, 113)),
+                    ImageLocation = "Resources/Themes/light",
+                }
+            },
+        };
+
         static void Main(string[] args)
         {
             var location = Path.GetDirectoryName(Assembly.GetEntryAssembly().GetFiles()[0].Name);
-            var options = JsonConvert.DeserializeObject<Options>(File.ReadAllText(Path.Combine(location, @"Resources/Options.json")));
+
+            // Look for options in user profile folder first.
+            var homeFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var options = ReadOptions(".imagedetailscore_options.json", homeFolder);
+            if (options == null)
+            {
+                // Fall-back to the default options.
+                Console.WriteLine("Using default options, user options not found");
+                options = ReadOptions("Options.json", location);
+                if (options == null)
+                {
+                    Console.Error.WriteLine("Cannot find the Options JSON file in the application folder");
+                }
+            }
 
             if (args.Count() < 1)
             {
@@ -63,6 +178,7 @@ namespace ImageDetailsCore
                 return;
             }
 
+            // Enumerate the files / folders and output the badges.
             foreach (var arg in args)
             {
                 if (File.Exists(arg))
@@ -78,6 +194,18 @@ namespace ImageDetailsCore
                     Console.WriteLine("Could not load file {0}...", arg);
                 }
             }
+        }
+
+        private static Options ReadOptions(string optionsFileName, string location)
+        {
+            var optionsFile = Path.Combine(location, optionsFileName);
+            if (!File.Exists(optionsFile))
+            {
+                return null;
+            }
+
+            var options = JsonConvert.DeserializeObject<Options>(File.ReadAllText(optionsFile));
+            return options;
         }
 
         private static void OutputFolderBadges(string folder, string assemblyLocation, Options options)
@@ -148,7 +276,7 @@ namespace ImageDetailsCore
                 // Fix up shutter speed
                 if (shutterSpeed.Contains("."))
                 {
-                    var decimalValue = double.Parse(shutterSpeed.Substring(0, shutterSpeed.Length - 1));
+                    var decimalValue = double.Parse(shutterSpeed[0..^1]);
                     if (decimalValue < 1)
                     {
                         shutterSpeed = string.Format("1/{0}s", 1 / decimalValue);
@@ -165,53 +293,71 @@ namespace ImageDetailsCore
                     whiteBalance = whiteBalanceMode;
                 }
 
-                using var bitmap = new Bitmap(480, 300, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                if (!themeData.ContainsKey(options.Theme))
+                {
+                    options.Theme = "black";
+                }
+
+                var theme = themeData[options.Theme];
+                var imageLocation = Path.Combine(assemblyLocation, theme.ImageLocation);
+
+                var drawingScale = options.UseScaling ? 4 : 1;
+
+                using var bitmap = new Bitmap(480 * drawingScale, 300 * drawingScale, PixelFormat.Format32bppArgb);
                 using (var graphics = Graphics.FromImage(bitmap))
                 {
-                    graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                    graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-                    graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                    graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+                    graphics.SmoothingMode = SmoothingMode.HighQuality;
+                    graphics.CompositingQuality = CompositingQuality.HighQuality;
                     graphics.Clear(Color.Transparent);
 
                     // Draw the plaque
-                    DrawRoundedRect(graphics, 2, 2, 476, 296, Brushes.Black, 12, 12);
-                    DrawRoundedRect(graphics, 12, 12, 456, 276, Brushes.White, 9, 9);
-                    DrawRoundedRect(graphics, 15, 15, 450, 270, Brushes.Black, 8, 8);
+                    DrawRoundedRect(graphics, drawingScale, 2, 2, 476, 296, theme.BackgroundBrush, 13, 13);
+                    DrawRoundedRect(graphics, drawingScale, 12, 12, 456, 276, theme.BorderBrush, 9, 9);
+                    DrawRoundedRect(graphics, drawingScale, 15, 15, 450, 270, theme.BackgroundBrush, 8, 8);
 
                     // Draw the camera
-                    DrawValue(graphics, 14, 32, 28, 33, Path.Combine(assemblyLocation, @"Resources/camera.png"), "CAMERA", camera, FontStyle.Bold);
+                    DrawValue(graphics, theme, drawingScale, 14, 32, 28, 33, Path.Combine(imageLocation, @"camera.png"), "CAMERA", camera, FontStyle.Bold, theme.CameraForegroundBrush);
 
                     // Draw the lens
-                    DrawValue(graphics, 11, 28, 28, 78, Path.Combine(assemblyLocation, @"Resources/lens.png"), "LENS", lens);
+                    DrawValue(graphics, theme, drawingScale, 11, 28, 28, 78, Path.Combine(imageLocation, @"lens.png"), "LENS", lens);
 
                     // Draw the focal length
-                    DrawValue(graphics, 11, 28, 28, 118, Path.Combine(assemblyLocation, @"Resources/ruler.png"), "FOCAL LENGTH", focalLength);
+                    DrawValue(graphics, theme, drawingScale, 11, 28, 28, 118, Path.Combine(imageLocation, @"ruler.png"), "FOCAL LENGTH", focalLength);
 
                     // Draw the ISO
-                    DrawValue(graphics, 11, 28, 240, 118, Path.Combine(assemblyLocation, @"Resources/film.png"), "ISO", ISO);
+                    DrawValue(graphics, theme, drawingScale, 11, 28, 240, 118, Path.Combine(imageLocation, @"film.png"), "ISO", ISO);
 
                     // Draw the exposure
-                    DrawValue(graphics, 11, 28, 28, 158, Path.Combine(assemblyLocation, @"Resources/aperture.png"), "EXPOSURE", string.Format("{0} @ {1}", shutterSpeed, aperture));
+                    DrawValue(graphics, theme, drawingScale, 11, 28, 28, 158, Path.Combine(imageLocation, @"aperture.png"), "EXPOSURE", string.Format("{0} @ {1}", shutterSpeed, aperture));
 
                     // Draw the exposure bias
-                    DrawValue(graphics, 11, 28, 240, 158, Path.Combine(assemblyLocation, @"Resources/bias.png"), "EXPOSURE BIAS", exposureBias);
+                    DrawValue(graphics, theme, drawingScale, 11, 28, 240, 158, Path.Combine(imageLocation, @"bias.png"), "EXPOSURE BIAS", exposureBias);
 
                     // Draw the white balance
-                    DrawValue(graphics, 11, 28, 28, 198, Path.Combine(assemblyLocation, @"Resources/whitebalance.png"), "WHITE BALANCE", whiteBalance);
+                    DrawValue(graphics, theme, drawingScale, 11, 28, 28, 198, Path.Combine(imageLocation, @"whitebalance.png"), "WHITE BALANCE", whiteBalance);
 
                     // Draw the exposure program
-                    DrawValue(graphics, 11, 28, 240, 198, Path.Combine(assemblyLocation, @"Resources/exposure.png"), "EXPOSURE PROGRAM", exposureProgram);
+                    DrawValue(graphics, theme, drawingScale, 11, 28, 240, 198, Path.Combine(imageLocation, @"exposure.png"), "EXPOSURE PROGRAM", exposureProgram);
 
                     // Draw the date
-                    DrawValue(graphics, 11, 28, 28, 238, Path.Combine(assemblyLocation, @"Resources/calendar.png"), "DATE", dateTimeOriginal);
+                    DrawValue(graphics, theme, drawingScale, 11, 28, 28, 238, Path.Combine(imageLocation, @"calendar.png"), "DATE", dateTimeOriginal);
 
                     // Draw the time
-                    DrawValue(graphics, 11, 28, 240, 238, Path.Combine(assemblyLocation, @"Resources/artist.png"), "ARTIST", artist);
+                    DrawValue(graphics, theme, drawingScale, 11, 28, 240, 238, Path.Combine(imageLocation, @"artist.png"), "ARTIST", artist);
                 }
                 var output = Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file) + "_info.png");
-                bitmap.Save(output, System.Drawing.Imaging.ImageFormat.Png);
-                
+                if (options.UseScaling)
+                {
+                    using var result = ResizeImage(bitmap, 480 * 2, 300 * 2);
+                    result.Save(output, ImageFormat.Png);
+                }
+                else
+                {
+                    bitmap.Save(output, ImageFormat.Png);
+                }
+
                 Console.WriteLine("Processed {0}...", Path.GetFileName(file));
             }
             catch (Exception exception)
@@ -234,32 +380,63 @@ namespace ImageDetailsCore
             return null;
         }
 
-        private static void DrawValue(Graphics graphics, int fontSize, int imageSize, int x, int y, string image, string label, string value, FontStyle fontStyle = FontStyle.Regular)
+        private static void DrawValue(Graphics graphics, ThemeData theme, int scale, int fontSize, int imageSize, int x, int y, string image, string label, string value, FontStyle fontStyle = FontStyle.Regular, Brush valueBrush = null)
         {
             using (var resImage = new Bitmap(image))
             {
-                graphics.DrawImage(resImage, x, y, imageSize, imageSize);
+                graphics.DrawImage(resImage, x * scale, y * scale, imageSize * scale, imageSize * scale);
             }
-            using (var font = new Font("Arial", 7, FontStyle.Bold))
+            using (var font = new Font("Arial", 7 * scale, FontStyle.Bold))
             {
-                graphics.DrawString(label, font, Brushes.Gray, x + 36, y);
+                graphics.DrawString(label, font, theme.LabelBrush, (x + 36) * scale, y * scale);
             }
-            using (var font = new Font("Candara", fontSize, fontStyle))
+            using (var font = new Font("Candara", fontSize * scale, fontStyle))
             {
-                graphics.DrawString(value, font, Brushes.White, x + 36, y + 10);
+                graphics.DrawString(value, font, valueBrush ?? theme.ForegroundBrush, (x + 36) * scale, (y + 10) * scale);
             }
         }
 
-        private static void DrawRoundedRect(Graphics graphics, int left, int top, int width, int height, Brush color, int radiusX, int radiusY)
+        private static void DrawRoundedRect(Graphics graphics, int scale, int left, int top, int width, int height, Brush brush, int radiusX, int radiusY)
         {
+            radiusX *= scale;
+            radiusY *= scale;
             int diameterX = 2 * radiusX;
             int diameterY = 2 * radiusY;
-            graphics.FillRectangle(color, left + radiusX, top, width - diameterX, height);
-            graphics.FillRectangle(color, left, top + radiusY, width, height - diameterY);
-            graphics.FillEllipse(color, left, top, diameterX, diameterY);
-            graphics.FillEllipse(color, left + width - diameterY, top, diameterX, diameterY);
-            graphics.FillEllipse(color, left, top + height - diameterY, diameterX, diameterY);
-            graphics.FillEllipse(color, left + width - diameterY, top + height - diameterY, diameterX, diameterY);
+            left *= scale;
+            top *= scale;
+            width *= scale;
+            height *= scale;
+
+            graphics.FillRectangle(brush, left + radiusX, top, width - diameterX, height);
+            graphics.FillRectangle(brush, left, top + radiusY, width, height - diameterY);
+            graphics.FillEllipse(brush, left, top, diameterX, diameterY);
+            graphics.FillEllipse(brush, left + width - diameterY, top, diameterX, diameterY);
+            graphics.FillEllipse(brush, left, top + height - diameterY, diameterX, diameterY);
+            graphics.FillEllipse(brush, left + width - diameterY, top + height - diameterY, diameterX, diameterY);
+        }
+
+        public static Bitmap ResizeImage(Image image, int width, int height)
+        {
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new Bitmap(width, height);
+
+            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using var wrapMode = new ImageAttributes();
+                wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                graphics.Clear(Color.Transparent);
+                graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+            }
+
+            return destImage;
         }
     }
 }

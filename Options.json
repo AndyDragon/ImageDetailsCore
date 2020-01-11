@@ -1,0 +1,13 @@
+{
+  "theme": "dark",
+  "useScaling": false,
+  "warnMissingCamera": false,
+  "warnMissingLens": false,
+  "recursiveFolders": false,
+  "folderSearchExtensions": [
+    ".jpg",
+    ".jpeg"
+  ],
+  "cameras": [],
+  "lenses": []
+}

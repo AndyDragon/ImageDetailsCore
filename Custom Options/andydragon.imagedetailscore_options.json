@@ -1,4 +1,6 @@
 {
+  "theme": "dark",
+  "useScaling": true,
   "warnMissingCamera": true,
   "warnMissingLens": true,
   "recursiveFolders": false,
