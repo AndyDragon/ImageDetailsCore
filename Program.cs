@@ -418,9 +418,7 @@ namespace ImageDetailsCore
         public static Bitmap ResizeImage(Image image, int width, int height)
         {
             var destRect = new Rectangle(0, 0, width, height);
-            var destImage = new Bitmap(width, height);
-
-            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+            var destImage = new Bitmap(width, height, PixelFormat.Format32bppArgb);
 
             using (var graphics = Graphics.FromImage(destImage))
             {
