@@ -224,22 +224,83 @@ namespace ImageDetailsCore
 
         private static void OutputBadge(string file, string assemblyLocation, Options options)
         {
+            Func<string, string, TagLocator> Locator = (directory, tag) => new TagLocator { Directory = directory, Tag = tag };
+
             try
             {
                 IEnumerable<MetadataExtractor.Directory> directories = MetadataExtractor.ImageMetadataReader.ReadMetadata(file);
-                var camera = GetStringValue(directories, "Exif IFD0", "Model") ?? GetStringValue(directories, "Exif SubIFD", "Model") ?? "unknown";
-                var serial = GetStringValue(directories, "Exif IFD0", "Serial Number") ?? GetStringValue(directories, "Olympus Equipment", "Serial Number") ?? "unknown";
-                var lens = GetStringValue(directories, "Exif SubIFD", "Lens Model") ?? "n/a";
-                var focalLength = (GetStringValue(directories, "Exif SubIFD", "Focal Length") ?? GetStringValue(directories, "Exif SubIFD", "Focal Length 35") ?? "n/a").Replace(" mm", "mm");
-                var ISO = GetStringValue(directories, "Exif SubIFD", "ISO Speed Ratings") ?? "n/a";
-                var shutterSpeed = (GetStringValue(directories, "Exif SubIFD", "Exposure Time") ?? "n/a").Replace(" sec", "s");
-                var aperture = (GetStringValue(directories, "Exif SubIFD", "F-Number") ?? "n/a").Replace("f/", "ƒ/");
-                var exposureBias = GetStringValue(directories, "Exif SubIFD", "Exposure Bias Value") ?? "n/a";
-                var exposureProgram = GetStringValue(directories, "Exif SubIFD", "Exposure Program") ?? "n/a";
-                var whiteBalanceMode = GetStringValue(directories, "Exif SubIFD", "White Balance Mode") ?? "n/a";
-                var whiteBalance = GetStringValue(directories, "Exif SubIFD", "White Balance") ?? "n/a";
-                var dateTimeOriginal = GetStringValue(directories, "Exif SubIFD", "Date/Time Original") ?? "n/a";
-                var artist = GetStringValue(directories, "Exif IFD0", "Artist") ?? GetStringValue(directories, "Exif SubIFD", "Artist") ?? "n/a";
+                // Change the following line to dump the EXIF data to the console.
+                var dumpExif = false;
+                if (dumpExif)
+                {
+                    foreach (var directory in directories)
+                        foreach (var tag in directory.Tags)
+                            Console.WriteLine($"{directory.Name} - {tag.Name} = {tag.Description}");
+                    return;
+                }
+
+                var camera = GetStringValue(directories, new[] {
+                    Locator("Exif IFD0", "Model"),
+                    Locator("Exif SubIFD", "Model"),
+                }) ?? "unknown";
+
+                var cameraSerial = GetStringValue(directories, new[] {
+                    Locator("Exif IFD0", "Serial Number"),
+                    Locator("Exif SubIFD", "Body Serial Number"),
+                    Locator("Olympus Equipment", "Serial Number"),
+                }) ?? "unknown";
+
+                var lens = GetStringValue(directories, new[] {
+                    Locator("Exif SubIFD", "Lens Model"),
+                }) ?? "n/a";
+
+                var lensSerial = GetStringValue(directories, new[] {
+                    Locator("Exif IFD0", "Lens Serial Number"),
+                    Locator("Exif SubIFD", "Lens Body Serial Number"),
+                    Locator("Olympus Equipment", "Lens Serial Number"),
+                }) ?? "unknown";
+
+                var focalLength = (GetStringValue(directories, new[] {
+                    Locator("Exif SubIFD", "Focal Length"),
+                    Locator("Exif SubIFD", "Focal Length 35"),
+                }) ?? "n/a").Replace(" mm", "mm");
+
+                var ISO = GetStringValue(directories, new[] {
+                    Locator("Exif SubIFD", "ISO Speed Ratings"),
+                }) ?? "n/a";
+
+                var shutterSpeed = (GetStringValue(directories, new[] {
+                    Locator("Exif SubIFD", "Exposure Time"),
+                }) ?? "n/a").Replace(" sec", "s");
+
+                var aperture = (GetStringValue(directories, new[] {
+                    Locator("Exif SubIFD", "F-Number"),
+                }) ?? "n/a").Replace("f/", "ƒ/");
+
+                var exposureBias = GetStringValue(directories, new[] {
+                    Locator("Exif SubIFD", "Exposure Bias Value"),
+                }) ?? "n/a";
+
+                var exposureProgram = GetStringValue(directories, new[] {
+                    Locator("Exif SubIFD", "Exposure Program"),
+                }) ?? "n/a";
+
+                var whiteBalanceMode = GetStringValue(directories, new[] {
+                    Locator("Exif SubIFD", "White Balance Mode"),
+                }) ?? "n/a";
+
+                var whiteBalance = GetStringValue(directories, new[] {
+                    Locator("Exif SubIFD", "White Balance"),
+                }) ?? "n/a";
+
+                var dateTimeOriginal = GetStringValue(directories, new[] {
+                    Locator("Exif SubIFD", "Date/Time Original"),
+                }) ?? "n/a";
+
+                var artist = GetStringValue(directories, new[] {
+                    Locator("Exif IFD0", "Artist"),
+                    Locator("Exif SubIFD", "Artist"),
+                }) ?? "n/a";
 
                 if (camera == "unknown")
                 {
@@ -248,10 +309,14 @@ namespace ImageDetailsCore
                 }
 
                 // Fix up camera
-                var cameraMapping = options.Cameras.FirstOrDefault(map => {
-                    if (!string.IsNullOrEmpty(map.Serial)) {
-                        return map.Source.Trim() == camera.Trim() && map.Serial.Trim() == serial.Trim();
+                var cameraMapping = options.Cameras.FirstOrDefault(map =>
+                {
+                    // Camera can be mapped using serial number.
+                    if (!string.IsNullOrEmpty(map.Serial))
+                    {
+                        return map.Source.Trim() == camera.Trim() && map.Serial.Trim() == cameraSerial.Trim();
                     }
+                    // Fallback for no serial number specified.
                     return map.Source.Trim() == camera.Trim();
                 });
                 if (cameraMapping != null)
@@ -262,15 +327,27 @@ namespace ImageDetailsCore
                 {
                     if (options.WarnMissingCamera)
                     {
-                        Console.WriteLine("WARN: Could not map camera '{0}' s/n '{1}' in {2}", camera, serial, Path.GetFileName(file));
+                        Console.WriteLine("WARN: Could not map camera '{0}' s/n '{1}' in {2}", camera, cameraSerial, Path.GetFileName(file));
                     }
                 }
 
                 // Fix up lens
-                var lensMapping = options.Lenses.FirstOrDefault(map => {
-                    if (!string.IsNullOrEmpty(map.Camera)) {
+                var lensMapping = options.Lenses.FirstOrDefault(map =>
+                {
+                    // Lens can be mapped using camera, serial number or both.
+                    if (!string.IsNullOrEmpty(map.Serial) && !string.IsNullOrEmpty(map.Camera))
+                    {
+                        return map.Source.Trim() == camera.Trim() && map.Serial.Trim() == lensSerial.Trim() && map.Camera.Trim() == camera.Trim();
+                    }
+                    if (!string.IsNullOrEmpty(map.Camera))
+                    {
                         return map.Source.Trim() == lens.Trim() && map.Camera.Trim() == camera.Trim();
                     }
+                    if (!string.IsNullOrEmpty(map.Serial))
+                    {
+                        return map.Source.Trim() == camera.Trim() && map.Serial.Trim() == lensSerial.Trim();
+                    }
+                    // Fallback for no serial number or camera specified.
                     return map.Source.Trim() == lens.Trim();
                 });
                 if (lensMapping != null)
@@ -281,7 +358,7 @@ namespace ImageDetailsCore
                 {
                     if (options.WarnMissingCamera)
                     {
-                        Console.WriteLine("WARN: Could not map lens '{0}' in {1}", lens, Path.GetFileName(file));
+                        Console.WriteLine("WARN: Could not map lens '{0}' s/n '{1}' in {2}", lens, lensSerial, Path.GetFileName(file));
                     }
                 }
                 lens = lens.Replace("f/", "ƒ/").Replace("F/", "ƒ/").Replace("F_", "ƒ/");
@@ -397,15 +474,27 @@ namespace ImageDetailsCore
             }
         }
 
-        private static string GetStringValue(IEnumerable<MetadataExtractor.Directory> directories, string directoryName, string tagName)
+        class TagLocator
         {
-            var directory = directories.FirstOrDefault(directory => directory.Name == directoryName);
-            if (directory != null)
+            public string Directory { get; set; }
+            public string Tag { get; set; }
+        }
+
+        private static string GetStringValue(IEnumerable<MetadataExtractor.Directory> directories, IEnumerable<TagLocator> tagLocators)
+        {
+            foreach (var locator in tagLocators)
             {
-                var tag = directory.Tags.FirstOrDefault(tag => tag.Name == tagName);
-                if (tag != null)
+                var locatedDirectories = directories.Where(directory => directory.Name == locator.Directory);
+                foreach (var directory in locatedDirectories)
                 {
-                    return tag.Description;
+                    if (directory != null)
+                    {
+                        var tag = directory.Tags.FirstOrDefault(tag => tag.Name == locator.Tag);
+                        if (tag != null)
+                        {
+                            return tag.Description;
+                        }
+                    }
                 }
             }
             return null;
