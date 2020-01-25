@@ -241,18 +241,19 @@ namespace ImageDetailsCore
                 var dateTimeOriginal = GetStringValue(directories, "Exif SubIFD", "Date/Time Original") ?? "n/a";
                 var artist = GetStringValue(directories, "Exif IFD0", "Artist") ?? GetStringValue(directories, "Exif SubIFD", "Artist") ?? "n/a";
 
-// foreach (var directory in directories)
-// foreach (var tag in directory.Tags)
-//     Console.WriteLine($"{directory.Name} - {tag.Name} = {tag.Description}");
-
                 if (camera == "unknown")
                 {
                     Console.WriteLine("ERR: Could not find camera for {0}", Path.GetFileName(file));
                     return;
                 }
-                                
+
                 // Fix up camera
-                var cameraMapping = options.Cameras.FirstOrDefault(map => map.Source.Trim() == camera.Trim() && map.Serial.Trim() == serial.Trim());
+                var cameraMapping = options.Cameras.FirstOrDefault(map => {
+                    if (!string.IsNullOrEmpty(map.Serial)) {
+                        return map.Source.Trim() == camera.Trim() && map.Serial.Trim() == serial.Trim();
+                    }
+                    return map.Source.Trim() == camera.Trim();
+                });
                 if (cameraMapping != null)
                 {
                     camera = cameraMapping.Display;
@@ -269,7 +270,7 @@ namespace ImageDetailsCore
                 var lensMapping = options.Lenses.FirstOrDefault(map => {
                     if (!string.IsNullOrEmpty(map.Camera)) {
                         return map.Source.Trim() == lens.Trim() && map.Camera.Trim() == camera.Trim();
-                    }                    
+                    }
                     return map.Source.Trim() == lens.Trim();
                 });
                 if (lensMapping != null)
