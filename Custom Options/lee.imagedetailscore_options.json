@@ -1,0 +1,93 @@
+{
+  "theme": "dark",
+  "useScaling": true,
+  "warnMissingCamera": true,
+  "warnMissingLens": true,
+  "recursiveFolders": true,
+  "folderSearchExtensions": [
+    ".jpg",
+    ".jpeg"
+  ],
+  "cameras": [
+    {
+      "source": "E-M1            ",
+      "serial": "BHP298059",
+      "display": "Olympus E-M1"
+    },
+    {
+      "source": "E-M1            ",
+      "serial": "unknown",
+      "display": "Olympus E-M1"
+    },
+    {
+      "source": "E-M5            ",
+      "serial": "BEJ512475",
+      "display": "Olympus E-M5 #1"
+    },
+    {
+      "source": "E-M5            ",
+      "serial": "unknown",
+      "display": "Olympus E-M5"
+    },
+    {
+      "source": "TG-1            ",
+      "serial": "BCA533154                      ",
+      "display": "Olympus TG-1"
+    },
+    {
+      "source": "TG-1            ",
+      "serial": "unknown",
+      "display": "Olympus TG-1"
+    },
+    {
+      "source": "TG-5            ",
+      "serial": "BHWA31271                      ",
+      "display": "Olympus TG-5"
+    },
+    {
+      "source": "TG-5            ",
+      "serial": "unknown",
+      "display": "Olympus TG-5"
+    }
+  ],
+  "lenses": [
+    {
+      "source": "OLYMPUS M.12-40mm F2.8",
+      "display": "Olympus M.12-40mm f/2.8 PRO"
+    },
+    {
+      "source": "OLYMPUS M.14-42mm F3.5-5.6 II R",
+      "display": "Olympus M.14-42mm f/3.5-5.6 II R"
+    },
+    {
+      "source": "OLYMPUS M.40-150mm F4.0-5.6 R",
+      "display": "Olympus M.40-150mm f/4.0-5.6 R"
+    },
+    {
+      "source": "OLYMPUS M.40-150mm F2.8",
+      "display": "Olympus M.40-150mm f/2.8 R PRO"
+    },
+    {
+      "source": "M.40-150mm F2.8 + MC-14",
+      "display": "Olympus M.40-150mm f/2.8 R PRO + MC-1.4"
+    },
+    {
+      "source": "OLYMPUS M.14-42mm F3.5-5.6 EZ",
+      "display": "Olympus M.14-42mm f/3.5-5.6 EZ"
+    },
+    {
+      "source": "OLYMPUS M.7-14mm F2.8",
+      "display": "Olympus M.7-14mm f/2.8 PRO"
+    },
+    {
+      "source": "n/a",
+      "display": "Built-in",
+      "camera": "Olympus TG-1"
+    },
+    {
+      "source": "n/a",
+      "display": "Built-in",
+      "camera": "Olympus TG-5"
+    }
+  ]
+}

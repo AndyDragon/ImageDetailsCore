@@ -62,7 +62,9 @@ namespace ImageDetailsCore
     class MapValue
     {
         public string Source { get; set; }
+        public string Serial { get; set; }
         public string Display { get; set; }
+        public string Camera { get; set; }
     }
 
     class Program
@@ -226,6 +228,7 @@ namespace ImageDetailsCore
             {
                 IEnumerable<MetadataExtractor.Directory> directories = MetadataExtractor.ImageMetadataReader.ReadMetadata(file);
                 var camera = GetStringValue(directories, "Exif IFD0", "Model") ?? GetStringValue(directories, "Exif SubIFD", "Model") ?? "unknown";
+                var serial = GetStringValue(directories, "Exif IFD0", "Serial Number") ?? GetStringValue(directories, "Olympus Equipment", "Serial Number") ?? "unknown";
                 var lens = GetStringValue(directories, "Exif SubIFD", "Lens Model") ?? "n/a";
                 var focalLength = (GetStringValue(directories, "Exif SubIFD", "Focal Length") ?? GetStringValue(directories, "Exif SubIFD", "Focal Length 35") ?? "n/a").Replace(" mm", "mm");
                 var ISO = GetStringValue(directories, "Exif SubIFD", "ISO Speed Ratings") ?? "n/a";
@@ -238,14 +241,18 @@ namespace ImageDetailsCore
                 var dateTimeOriginal = GetStringValue(directories, "Exif SubIFD", "Date/Time Original") ?? "n/a";
                 var artist = GetStringValue(directories, "Exif IFD0", "Artist") ?? GetStringValue(directories, "Exif SubIFD", "Artist") ?? "n/a";
 
+// foreach (var directory in directories)
+// foreach (var tag in directory.Tags)
+//     Console.WriteLine($"{directory.Name} - {tag.Name} = {tag.Description}");
+
                 if (camera == "unknown")
                 {
                     Console.WriteLine("ERR: Could not find camera for {0}", Path.GetFileName(file));
                     return;
                 }
-
+                                
                 // Fix up camera
-                var cameraMapping = options.Cameras.FirstOrDefault(map => map.Source == camera.Trim());
+                var cameraMapping = options.Cameras.FirstOrDefault(map => map.Source.Trim() == camera.Trim() && map.Serial.Trim() == serial.Trim());
                 if (cameraMapping != null)
                 {
                     camera = cameraMapping.Display;
@@ -254,12 +261,17 @@ namespace ImageDetailsCore
                 {
                     if (options.WarnMissingCamera)
                     {
-                        Console.WriteLine("WARN: Could not map camera '{0}' in {1}", camera, Path.GetFileName(file));
+                        Console.WriteLine("WARN: Could not map camera '{0}' s/n '{1}' in {2}", camera, serial, Path.GetFileName(file));
                     }
                 }
 
                 // Fix up lens
-                var lensMapping = options.Lenses.FirstOrDefault(map => map.Source == lens.Trim());
+                var lensMapping = options.Lenses.FirstOrDefault(map => {
+                    if (!string.IsNullOrEmpty(map.Camera)) {
+                        return map.Source.Trim() == lens.Trim() && map.Camera.Trim() == camera.Trim();
+                    }                    
+                    return map.Source.Trim() == lens.Trim();
+                });
                 if (lensMapping != null)
                 {
                     lens = lensMapping.Display;
@@ -291,6 +303,24 @@ namespace ImageDetailsCore
                 if (whiteBalance == "n/a")
                 {
                     whiteBalance = whiteBalanceMode;
+                }
+                if (whiteBalance.Length > 24)
+                {
+                    int position = whiteBalance.Substring(0, 24).LastIndexOf(' ');
+                    if (position >= 0)
+                    {
+                        whiteBalance = whiteBalance.Substring(0, position);
+                    }
+                }
+
+                // Fix up exposure prgm
+                if (exposureProgram.Length > 24)
+                {
+                    int position = exposureProgram.Substring(0, 24).LastIndexOf(' ');
+                    if (position >= 0)
+                    {
+                        exposureProgram = exposureProgram.Substring(0, position);
+                    }
                 }
 
                 if (!themeData.ContainsKey(options.Theme))
