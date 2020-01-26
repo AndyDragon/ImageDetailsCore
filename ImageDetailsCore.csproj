@@ -24,7 +24,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Update="Custom Options\andydragon.imagedetailscore_options.json">
+    <None Update="Custom Options\**\*">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
   </ItemGroup>
