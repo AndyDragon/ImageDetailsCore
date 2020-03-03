@@ -2,6 +2,10 @@
 
 The ImageDetailsCore project is a .NET Core console application which uses MetadataExtractor and System.Drawing to load the EXIF data from an image file and produces an image details badge PNG (in the same location using the _info.png suffix). This can be used to show the details about photographs on social media platforms as a nice way to display the camera settings.
 
+## Status
+
+![.NET Core](https://github.com/AndyDragon/ImageDetailsCore/workflows/.NET%20Core/badge.svg)
+
 ## Sample
 
 ![alt text](docs/Sample_info.png "Simple image badge")
