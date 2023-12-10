@@ -538,27 +538,21 @@ namespace ImageDetailsCore
                         {
                             imageContext = imageContext.Fill(theme.BackgrounColor);
 
-                            //Console.WriteLine("Result image: {0} x {1}", resultImage.Width, resultImage.Height);
                             var scaleX = (float)resultImage.Width / layerImage.Width;
                             var scaleY = (float)resultImage.Height / layerImage.Height;
                             var resultScale = Math.Max(scaleX, scaleY);
-                            //Console.WriteLine("Scale: X: {0}, Y: {1}", scaleX, scaleY);
-                            var newLayerImageWidth = (int)(layerImage.Width * resultScale);
-                            //Console.WriteLine("New layer width: {0}", newLayerImageWidth);
+                            var newLayerImageWidth = layerImage.Width * resultScale;
                             var left = (resultImage.Width - newLayerImageWidth) / 2;
-                            //Console.WriteLine("Left: {0}", left);
-                            var newLayerImageHeight = (int)(layerImage.Height * resultScale);
-                            //Console.WriteLine("New layer height: {0}", newLayerImageHeight);
+                            var newLayerImageHeight = layerImage.Height * resultScale;
                             var top = (resultImage.Height - newLayerImageHeight) / 2;
-                            //Console.WriteLine("Top: {0}", top);
                             layerImage.Mutate(layerImageContext =>
                             {
-                                layerImageContext = layerImageContext.Resize(newLayerImageWidth, newLayerImageHeight);
+                                layerImageContext = layerImageContext.Resize((int)(newLayerImageWidth * 1.1), (int)(newLayerImageHeight * 1.1));
                             });
                             imageContext = imageContext.DrawImage(
                                 layerImage,
-                                new Point(left, top),
-                                new Rectangle((layerImage.Width - resultImage.Width) / 2, (layerImage.Height - resultImage.Height) / 2, Math.Min(layerImage.Width, resultImage.Width), Math.Min(resultImage.Height, layerImage.Height)),
+                                new Point(0, 0),
+                                new Rectangle((layerImage.Width - resultImage.Width) / 2, (layerImage.Height - resultImage.Height) / 2, resultImage.Width, resultImage.Height),
                                 1f);
 
                             imageContext = imageContext.GaussianBlur(30);
