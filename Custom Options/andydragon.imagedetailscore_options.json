@@ -1,9 +1,11 @@
 {
-  "theme": "dark",
+  "theme": "nikon",
+  "themeFromExt": true,
   "useScaling": true,
   "warnMissingCamera": true,
   "warnMissingLens": true,
   "recursiveFolders": false,
+  "defaultArtist": "Andrew Forget",
   "folderSearchExtensions": [
     ".jpg",
     ".jpeg"
@@ -11,6 +13,7 @@
   "cameras": [
     { "source": "OLYMPUS E-500",          "display": "OLYMPUS E-500" },
     { "source": "E-500",                  "display": "OLYMPUS E-500" },
+    { "source": "OM-1            ",       "display": "OM SYSTEM OM-1" },
 
     { "source": "NIKON D5200",            "display": "NIKON D5200" },
 
@@ -24,12 +27,20 @@
     { "source": "NIKON Z7",               "display": "NIKON Z7" },
     { "source": "Z 7",                    "display": "NIKON Z7" },
 
+    { "source": "NIKON Z 8",              "display": "NIKON Z8" },
+    { "source": "NIKON Z8",               "display": "NIKON Z8" },
+    { "source": "Z 8",                    "display": "NIKON Z8" },
+
+    { "source": "GFX100S",                "display": "Fujifilm GFX100S" },
+
     { "source": "1200HD",                 "display": "SEA & SEA 1200HD" },
 
-    { "source": "6MP-9FS",                 "display": "INTOVA 6MP" }
+    { "source": "6MP-9FS",                "display": "INTOVA 6MP" }
   ],
   "lenses": [
     { "source": "NIKKOR Z 24-70mm f/4 S",                           "display": "NIKKOR Z 24-70mm f/4 S" },
+
+    { "source": "NIKKOR Z 85mm f/1.8 S",                            "display": "NIKKOR Z 85mm f/1.8 S" },
 
     { "source": "70-200mm f/2.8",                                   "display": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N" },
     { "source": "70.0-200.0 mm f/2.8",                              "display": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N" },
@@ -48,6 +59,7 @@
     { "source": "Nikon DX 18-200mm f3.5-5.6 G ED IF",               "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A017N" },
 
     { "source": "150.0-600.0 mm f/5.0-6.3",                         "display": "TAMRON SP 150-600mm f/5-6.3 Di VC USD G2 A022N" },
+    { "source": "150-600mm f/5.0-6.3",                              "display": "TAMRON SP 150-600mm f/5-6.3 Di VC USD G2 A022N" },
     { "source": "TAMRON SP 150-600mm F5-6.3 Di VC USD A011N",       "display": "TAMRON SP 150-600mm f/5-6.3 Di VC USD G2 A022N" },
     { "source": "TAMRON SP 150-600mm f/5-6.3 Di VC USD G2 A022N",   "display": "TAMRON SP 150-600mm f/5-6.3 Di VC USD G2 A022N" },
 
@@ -64,7 +76,7 @@
 
     { "source": "50.0 mm f/1.8",                                    "display": "NIKKOR AF-S FX 50mm f/1.8G" },
     { "source": "Nikon AF-S NIKKOR 50mm f1.8G",                     "display": "NIKKOR AF-S FX 50mm f/1.8G" },
-    { "source": "NIKKOR AF-S FX 50mm f/1.8G",                       "display": "NIKKOR AF-S FX 50mm f/1.8G"},
+    { "source": "NIKKOR AF-S FX 50mm f/1.8G",                       "display": "NIKKOR AF-S FX 50mm f/1.8G" },
 
     { "source": "18.0-105.0 mm f/3.5-5.6",                          "display": "NIKKOR AF-S DX 18-105mm f/3.5-5.6G ED VR" },
     { "source": "Nikon AF-S DX NIKKOR 18-105mm f3.5-5.6G ED VR",    "display": "NIKKOR AF-S DX 18-105mm f/3.5-5.6G ED VR" },
@@ -73,7 +85,12 @@
     { "source": "14.0-45.0 mm f/3.5-5.6",                           "display": "OLYMPUS Zuiko 14-45mm f/3.5-5.6" },
     { "source": "Olympus Zuiko Digital 14-45mm f/3.5-5.6",          "display": "OLYMPUS Zuiko 14-45mm f/3.5-5.6" },
 
-    { "source": "40.0-150.0 mm f/3.5-4.5",                           "display": "OLYMPUS Zuiko 40-150mm f/3.5-4.5" },
-    { "source": "Olympus Zuiko Digital 40-150mm f/3.5-4.5",          "display": "OLYMPUS Zuiko 40-150mm f/3.5-4.5" }
+    { "source": "40.0-150.0 mm f/3.5-4.5",                          "display": "OLYMPUS Zuiko 40-150mm f/3.5-4.5" },
+    { "source": "Olympus Zuiko Digital 40-150mm f/3.5-4.5",         "display": "OLYMPUS Zuiko 40-150mm f/3.5-4.5" },
+
+    { "source": "OLYMPUS M.100-400mm F5.0-6.3",                     "display": "OLYMPUS Zuiko 100-400mm f/5-6.3" },
+    { "source": "M.100-400mm F5.0-6.3 + MC-14",                     "display": "OLYMPUS Zuiko 100-400mm f/5-6.3 + 1.4 TC" },
+
+    { "source": "GF32-64mmF4 R LM WR",				    "display": "FUJINON GF 32-64mm f/4 R LM WR" },
   ]
 }

@@ -53,8 +53,10 @@ namespace ImageDetailsCore
         public bool WarnMissingLens { get; set; }
         public bool RecursiveFolders { get; set; }
         public string Theme { get; set; }
+        public bool ThemeFromExt { get; set; }
         public IList<string> FolderSearchExtensions { get; set; }
         public bool UseScaling { get; set; }
+        public string DefaultArtist { get; set; }
         public IList<MapValue> Cameras { get; set; }
         public IList<MapValue> Lenses { get; set; }
     }
@@ -124,9 +126,21 @@ namespace ImageDetailsCore
                 {
                     BackgroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
                     ForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
-                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(215, 0, 0)),
+                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 0)),
                     LabelBrush = new SolidBrush(Color.FromArgb(113, 113, 0)),
                     BorderBrush = new SolidBrush(Color.FromArgb(226, 226, 0)),
+                    ImageLocation = "Resources/Themes/dark",
+                }
+            },
+            {
+                "fujifilm",
+                new ThemeData
+                {
+                    BackgroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
+                    ForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
+                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(144, 215, 144)),
+                    LabelBrush = new SolidBrush(Color.FromArgb(96, 113, 96)),
+                    BorderBrush = new SolidBrush(Color.FromArgb(144, 226, 144)),
                     ImageLocation = "Resources/Themes/dark",
                 }
             },
@@ -152,6 +166,18 @@ namespace ImageDetailsCore
                     LabelBrush = new SolidBrush(Color.FromArgb(3, 3, 64)),
                     BorderBrush = new SolidBrush(Color.FromArgb(6, 6, 113)),
                     ImageLocation = "Resources/Themes/light",
+                }
+            },
+            {
+                "omsystem",
+                new ThemeData
+                {
+                    BackgroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
+                    ForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
+                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(48, 96, 215)),
+                    LabelBrush = new SolidBrush(Color.FromArgb(24, 48, 113)),
+                    BorderBrush = new SolidBrush(Color.FromArgb(72, 144, 226)),
+                    ImageLocation = "Resources/Themes/dark",
                 }
             },
         };
@@ -252,6 +278,7 @@ namespace ImageDetailsCore
 
                 var lens = GetStringValue(directories, new[] {
                     Locator("Exif SubIFD", "Lens Model"),
+                    Locator("Nikon Makernote", "Lens"),
                 }) ?? "n/a";
 
                 var lensSerial = GetStringValue(directories, new[] {
@@ -300,7 +327,10 @@ namespace ImageDetailsCore
                 var artist = GetStringValue(directories, new[] {
                     Locator("Exif IFD0", "Artist"),
                     Locator("Exif SubIFD", "Artist"),
-                }) ?? "n/a";
+                }) ?? options.DefaultArtist ?? "n/a";
+                if (artist.Length == 0) {
+                    artist = options.DefaultArtist ?? "n/a";
+                }
 
                 if (camera == "unknown")
                 {
@@ -407,6 +437,31 @@ namespace ImageDetailsCore
                 }
 
                 var theme = themeData[options.Theme];
+                if (options.ThemeFromExt) {
+                    if (System.IO.Path.GetExtension(file).ToLower() == ".nef")
+                    {
+                        theme = themeData["nikon"];
+                    }
+                    else if (System.IO.Path.GetExtension(file).ToLower() == ".orf")
+                    {
+                        if (camera.StartsWith("OM SYSTEM"))
+                        {
+                            theme = themeData["omsystem"];
+                        }
+                        else
+                        {
+                            theme = themeData["olympus"];
+                        }
+                    }
+                    else if (System.IO.Path.GetExtension(file).ToLower() == ".raf")
+                    {
+                        theme = themeData["fujifilm"];
+                    }
+                    else if (System.IO.Path.GetExtension(file).ToLower() == ".cr2")
+                    {
+                        theme = themeData["canon"];
+                    }
+                }
                 var imageLocation = Path.Combine(assemblyLocation, theme.ImageLocation);
 
                 var drawingScale = options.UseScaling ? 4 : 1;

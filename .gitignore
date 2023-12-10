@@ -4,3 +4,9 @@
 **/obj
 **/packages
 **/.DS_Store
+*_info.png
+*.NEF
+*.RAF
+*.ORF
+*.CR2
+Thumbs.db
