@@ -6,9 +6,11 @@
   "warnMissingLens": true,
   "recursiveFolders": false,
   "defaultArtist": "Andrew Forget",
+  "skipDate": true,
   "folderSearchExtensions": [
-    ".jpg",
-    ".jpeg"
+    ".NEF",
+    ".ORF",
+    ".RAF"
   ],
   "cameras": [
     { "source": "OLYMPUS E-500",          "display": "OLYMPUS E-500" },
@@ -42,6 +44,14 @@
 
     { "source": "NIKKOR Z 85mm f/1.8 S",                            "display": "NIKKOR Z 85mm f/1.8 S" },
 
+    { "source": "NIKKOR Z 70-200mm f/2.8 VR S",                     "display": "NIKKOR Z 70-200mm f/2.8 VR S" },
+    { "source": "NIKKOR Z 70-200mm f/2.8 VR S Z TC-1.4x",           "display": "NIKKOR Z 70-200mm f/2.8 VR S + 1.4x TC" },
+    { "source": "NIKKOR Z 70-200mm f/2.8 VR S Z TC-2.0x",           "display": "NIKKOR Z 70-200mm f/2.8 VR S + 2.0x TC" },
+
+    { "source": "NIKKOR Z 180-600mm f/5.6-6.3 VR",                  "display": "NIKKOR Z 180-600mm f/5.6-6.3 VR" },
+    { "source": "NIKKOR Z 180-600mm f/5.6-6.3 VR Z TC-1.4x",        "display": "NIKKOR Z 180-600mm f/5.6-6.3 VR + 1.4x TC" },
+    { "source": "NIKKOR Z 180-600mm f/5.6-6.3 VR Z TC-2.0x",        "display": "NIKKOR Z 180-600mm f/5.6-6.3 VR + 2.0x TC" },
+
     { "source": "70-200mm f/2.8",                                   "display": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N" },
     { "source": "70.0-200.0 mm f/2.8",                              "display": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N" },
     { "source": "TAMRON SP 70-200mm F_2.8 Di A001N",                "display": "TAMRON SP 70-200mm f/2.8 Di VC USD G2 A025N" },
@@ -54,6 +64,8 @@
     { "source": "TAMRON SP 15-30mm f/2.8 Di VC USD G2 A041N",       "display": "TAMRON SP 15-30mm f/2.8 Di VC USD G2 A041N" },
 
     { "source": "70.0-300.0 mm f/4.0-5.6",                          "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A017N" },
+    { "source": "70-300mm f/4.0-5.6",                               "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A017N" },
+
     { "source": "TAMRON 70-300mm F4-5.6 Di A17N",                   "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A017N" },
     { "source": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A17N",      "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A017N" },
     { "source": "Nikon DX 18-200mm f3.5-5.6 G ED IF",               "display": "TAMRON AF 70-300mm f/4-5.6 Di LD MACRO A017N" },
@@ -64,6 +76,7 @@
     { "source": "TAMRON SP 150-600mm f/5-6.3 Di VC USD G2 A022N",   "display": "TAMRON SP 150-600mm f/5-6.3 Di VC USD G2 A022N" },
 
     { "source": "20.0 mm f/1.4",                                    "display": "SIGMA 20mm f/1.4 DG HSM A015" },
+    { "source": "20mm f/1.4G",                                      "display": "SIGMA 20mm f/1.4 DG HSM A015" },
     { "source": "SIGMA 20mm F1.4 DG HSM A015",                      "display": "SIGMA 20mm f/1.4 DG HSM A015" },
     { "source": "SIGMA 20mm f/1.4 DG HSM A015",                     "display": "SIGMA 20mm f/1.4 DG HSM A015" },
 
@@ -89,8 +102,8 @@
     { "source": "Olympus Zuiko Digital 40-150mm f/3.5-4.5",         "display": "OLYMPUS Zuiko 40-150mm f/3.5-4.5" },
 
     { "source": "OLYMPUS M.100-400mm F5.0-6.3",                     "display": "OLYMPUS Zuiko 100-400mm f/5-6.3" },
-    { "source": "M.100-400mm F5.0-6.3 + MC-14",                     "display": "OLYMPUS Zuiko 100-400mm f/5-6.3 + 1.4 TC" },
+    { "source": "M.100-400mm F5.0-6.3 + MC-14",                     "display": "OLYMPUS Zuiko 100-400mm f/5-6.3 + 1.4x TC" },
 
-    { "source": "GF32-64mmF4 R LM WR",				    "display": "FUJINON GF 32-64mm f/4 R LM WR" },
+    { "source": "GF32-64mmF4 R LM WR",                              "display": "FUJINON GF 32-64mm f/4 R LM WR" }
   ]
 }

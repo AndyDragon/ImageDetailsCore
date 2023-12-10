@@ -57,6 +57,7 @@ namespace ImageDetailsCore
         public IList<string> FolderSearchExtensions { get; set; }
         public bool UseScaling { get; set; }
         public string DefaultArtist { get; set; }
+        public bool SkipDate { get; set; }
         public IList<MapValue> Cameras { get; set; }
         public IList<MapValue> Lenses { get; set; }
     }
@@ -126,7 +127,7 @@ namespace ImageDetailsCore
                 {
                     BackgroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
                     ForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
-                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 0)),
+                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(226, 226, 0)),
                     LabelBrush = new SolidBrush(Color.FromArgb(113, 113, 0)),
                     BorderBrush = new SolidBrush(Color.FromArgb(226, 226, 0)),
                     ImageLocation = "Resources/Themes/dark",
@@ -138,7 +139,7 @@ namespace ImageDetailsCore
                 {
                     BackgroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
                     ForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
-                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(144, 215, 144)),
+                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(144, 226, 144)),
                     LabelBrush = new SolidBrush(Color.FromArgb(96, 113, 96)),
                     BorderBrush = new SolidBrush(Color.FromArgb(144, 226, 144)),
                     ImageLocation = "Resources/Themes/dark",
@@ -174,8 +175,8 @@ namespace ImageDetailsCore
                 {
                     BackgroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
                     ForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
-                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(48, 96, 215)),
-                    LabelBrush = new SolidBrush(Color.FromArgb(24, 48, 113)),
+                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(72, 144, 226)),
+                    LabelBrush = new SolidBrush(Color.FromArgb(48, 96, 113)),
                     BorderBrush = new SolidBrush(Color.FromArgb(72, 144, 226)),
                     ImageLocation = "Resources/Themes/dark",
                 }
@@ -311,6 +312,9 @@ namespace ImageDetailsCore
                 var exposureProgram = GetStringValue(directories, new[] {
                     Locator("Exif SubIFD", "Exposure Program"),
                 }) ?? "n/a";
+                var exposureMode = GetStringValue(directories, new[] {
+                    Locator("Exif SubIFD", "Exposure Mode"),
+                }) ?? "n/a";
 
                 var whiteBalanceMode = GetStringValue(directories, new[] {
                     Locator("Exif SubIFD", "White Balance Mode"),
@@ -422,6 +426,14 @@ namespace ImageDetailsCore
                 }
 
                 // Fix up exposure prgm
+                if (exposureProgram == "Unknown (0)")
+                {
+                    exposureProgram = exposureMode;
+                }
+                if (exposureProgram == "n/a")
+                {
+                    exposureProgram = exposureMode;
+                }
                 if (exposureProgram.Length > 24)
                 {
                     int position = exposureProgram.Substring(0, 24).LastIndexOf(' ');
@@ -504,11 +516,19 @@ namespace ImageDetailsCore
                     // Draw the exposure program
                     DrawValue(graphics, theme, drawingScale, 11, 28, 240, 198, Path.Combine(imageLocation, @"exposure.png"), "EXPOSURE PROGRAM", exposureProgram);
 
-                    // Draw the date
-                    DrawValue(graphics, theme, drawingScale, 11, 28, 28, 238, Path.Combine(imageLocation, @"calendar.png"), "DATE", dateTimeOriginal);
+                    if (options.SkipDate)
+                    {
+                        // Draw the date
+                        DrawValue(graphics, theme, drawingScale, 11, 28, 28, 238, Path.Combine(imageLocation, @"artist.png"), "ARTIST", artist);
+                    }
+                    else
+                    {
+                        // Draw the date
+                        DrawValue(graphics, theme, drawingScale, 11, 28, 28, 238, Path.Combine(imageLocation, @"calendar.png"), "DATE", dateTimeOriginal);
 
-                    // Draw the time
-                    DrawValue(graphics, theme, drawingScale, 11, 28, 240, 238, Path.Combine(imageLocation, @"artist.png"), "ARTIST", artist);
+                        // Draw the time
+                        DrawValue(graphics, theme, drawingScale, 11, 28, 240, 238, Path.Combine(imageLocation, @"artist.png"), "ARTIST", artist);
+                    }
                 }
                 var output = Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file) + "_info.png");
                 if (options.UseScaling)
