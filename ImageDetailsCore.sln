@@ -14,4 +14,11 @@ Global
 		{C766DFA6-241E-4E4E-B0E7-40F8FF4B790E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C766DFA6-241E-4E4E-B0E7-40F8FF4B790E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.DotNetNamingPolicy = $1
+		$1.DirectoryNamespaceAssociation = PrefixedHierarchical
+		$0.StandardHeader = $2
+		$0.VersionControlPolicy = $3
+	EndGlobalSection
 EndGlobal

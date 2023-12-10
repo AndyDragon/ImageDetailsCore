@@ -26,24 +26,27 @@ SOFTWARE.
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.Fonts;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace ImageDetailsCore
 {
     class ThemeData
     {
-        public Brush BackgroundBrush { get; set; }
-        public Brush ForegroundBrush { get; set; }
-        public Brush CameraForegroundBrush { get; set; }
-        public Brush LabelBrush { get; set; }
-        public Brush BorderBrush { get; set; }
+        public Color BackgrounColor { get; set; }
+        public Color ForegroundColor { get; set; }
+        public Color CameraForegroundColor { get; set; }
+        public Color LabelColor { get; set; }
+        public Color BorderColor { get; set; }
         public string ImageLocation { get; set; }
     }
 
@@ -72,17 +75,17 @@ namespace ImageDetailsCore
 
     class Program
     {
-        static readonly Dictionary<string, ThemeData> themeData = new Dictionary<string, ThemeData>
+        static readonly Dictionary<string, ThemeData> themeData = new()
         {
             {
                 "black",
                 new ThemeData
                 {
-                    BackgroundBrush = Brushes.Black,
-                    ForegroundBrush = Brushes.White,
-                    CameraForegroundBrush = Brushes.White,
-                    LabelBrush = new SolidBrush(Color.FromArgb(128, 128, 128)),
-                    BorderBrush = Brushes.White,
+                    BackgrounColor = Color.Black,
+                    ForegroundColor = Color.White,
+                    CameraForegroundColor = Color.White,
+                    LabelColor = Color.FromRgb(128, 128, 128),
+                    BorderColor = Color.White,
                     ImageLocation = "Resources/Themes/black",
                 }
             },
@@ -90,10 +93,10 @@ namespace ImageDetailsCore
                 "white",
                 new ThemeData
                 {
-                    BackgroundBrush = Brushes.White,
-                    ForegroundBrush = Brushes.Black,
-                    LabelBrush = new SolidBrush(Color.FromArgb(128, 128, 128)),
-                    BorderBrush = Brushes.Black,
+                    BackgrounColor = Color.White,
+                    ForegroundColor = Color.Black,
+                    LabelColor = Color.FromRgb(128, 128, 128),
+                    BorderColor = Color.Black,
                     ImageLocation = "Resources/Themes/white",
                 }
             },
@@ -101,11 +104,11 @@ namespace ImageDetailsCore
                 "dark",
                 new ThemeData
                 {
-                    BackgroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
-                    ForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
-                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
-                    LabelBrush = new SolidBrush(Color.FromArgb(128, 128, 128)),
-                    BorderBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
+                    BackgrounColor = Color.FromRgb(40, 40, 40),
+                    ForegroundColor = Color.FromRgb(215, 215, 215),
+                    CameraForegroundColor = Color.FromRgb(215, 215, 215),
+                    LabelColor = Color.FromRgb(128, 128, 128),
+                    BorderColor = Color.FromRgb(215, 215, 215),
                     ImageLocation = "Resources/Themes/dark",
                 }
             },
@@ -113,11 +116,11 @@ namespace ImageDetailsCore
                 "light",
                 new ThemeData
                 {
-                    BackgroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
-                    ForegroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
-                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
-                    LabelBrush = new SolidBrush(Color.FromArgb(128, 128, 128)),
-                    BorderBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
+                    BackgrounColor = Color.FromRgb(215, 215, 215),
+                    ForegroundColor = Color.FromRgb(40, 40, 40),
+                    CameraForegroundColor = Color.FromRgb(40, 40, 40),
+                    LabelColor = Color.FromRgb(128, 128, 128),
+                    BorderColor = Color.FromRgb(40, 40, 40),
                     ImageLocation = "Resources/Themes/light",
                 }
             },
@@ -125,11 +128,11 @@ namespace ImageDetailsCore
                 "nikon",
                 new ThemeData
                 {
-                    BackgroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
-                    ForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
-                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(226, 226, 0)),
-                    LabelBrush = new SolidBrush(Color.FromArgb(113, 113, 0)),
-                    BorderBrush = new SolidBrush(Color.FromArgb(226, 226, 0)),
+                    BackgrounColor = Color.FromRgb(40, 40, 40),
+                    ForegroundColor = Color.FromRgb(215, 215, 215),
+                    CameraForegroundColor = Color.FromRgb(226, 226, 0),
+                    LabelColor = Color.FromRgb(113, 113, 0),
+                    BorderColor = Color.FromRgb(226, 226, 0),
                     ImageLocation = "Resources/Themes/dark",
                 }
             },
@@ -137,11 +140,11 @@ namespace ImageDetailsCore
                 "fujifilm",
                 new ThemeData
                 {
-                    BackgroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
-                    ForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
-                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(144, 226, 144)),
-                    LabelBrush = new SolidBrush(Color.FromArgb(96, 113, 96)),
-                    BorderBrush = new SolidBrush(Color.FromArgb(144, 226, 144)),
+                    BackgrounColor = Color.FromRgb(40, 40, 40),
+                    ForegroundColor = Color.FromRgb(215, 215, 215),
+                    CameraForegroundColor = Color.FromRgb(144, 226, 144),
+                    LabelColor = Color.FromRgb(96, 113, 96),
+                    BorderColor = Color.FromRgb(144, 226, 144),
                     ImageLocation = "Resources/Themes/dark",
                 }
             },
@@ -149,11 +152,11 @@ namespace ImageDetailsCore
                 "canon",
                 new ThemeData
                 {
-                    BackgroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
-                    ForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
-                    CameraForegroundBrush = new SolidBrush(Color.White),
-                    LabelBrush = new SolidBrush(Color.FromArgb(113, 6, 6)),
-                    BorderBrush = new SolidBrush(Color.FromArgb(215, 11, 11)),
+                    BackgrounColor = Color.FromRgb(40, 40, 40),
+                    ForegroundColor = Color.FromRgb(215, 215, 215),
+                    CameraForegroundColor = Color.White,
+                    LabelColor = Color.FromRgb(113, 6, 6),
+                    BorderColor = Color.FromRgb(215, 11, 11),
                     ImageLocation = "Resources/Themes/dark",
                 }
             },
@@ -161,11 +164,11 @@ namespace ImageDetailsCore
                 "olympus",
                 new ThemeData
                 {
-                    BackgroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
-                    ForegroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
-                    CameraForegroundBrush = new SolidBrush(Color.Black),
-                    LabelBrush = new SolidBrush(Color.FromArgb(3, 3, 64)),
-                    BorderBrush = new SolidBrush(Color.FromArgb(6, 6, 113)),
+                    BackgrounColor = Color.FromRgb(215, 215, 215),
+                    ForegroundColor = Color.FromRgb(40, 40, 40),
+                    CameraForegroundColor = Color.Black,
+                    LabelColor = Color.FromRgb(3, 3, 64),
+                    BorderColor = Color.FromRgb(6, 6, 113),
                     ImageLocation = "Resources/Themes/light",
                 }
             },
@@ -173,11 +176,11 @@ namespace ImageDetailsCore
                 "omsystem",
                 new ThemeData
                 {
-                    BackgroundBrush = new SolidBrush(Color.FromArgb(40, 40, 40)),
-                    ForegroundBrush = new SolidBrush(Color.FromArgb(215, 215, 215)),
-                    CameraForegroundBrush = new SolidBrush(Color.FromArgb(72, 144, 226)),
-                    LabelBrush = new SolidBrush(Color.FromArgb(48, 96, 113)),
-                    BorderBrush = new SolidBrush(Color.FromArgb(72, 144, 226)),
+                    BackgrounColor = Color.FromRgb(40, 40, 40),
+                    ForegroundColor = Color.FromRgb(215, 215, 215),
+                    CameraForegroundColor = Color.FromRgb(72, 144, 226),
+                    LabelColor = Color.FromRgb(48, 96, 113),
+                    BorderColor = Color.FromRgb(72, 144, 226),
                     ImageLocation = "Resources/Themes/dark",
                 }
             },
@@ -185,7 +188,7 @@ namespace ImageDetailsCore
 
         static void Main(string[] args)
         {
-            var location = Path.GetDirectoryName(Assembly.GetEntryAssembly().GetFiles()[0].Name);
+            var location = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().GetFiles()[0].Name);
 
             // Look for options in user profile folder first.
             var homeFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -201,7 +204,7 @@ namespace ImageDetailsCore
                 }
             }
 
-            if (args.Count() < 1)
+            if (args.Length < 1)
             {
                 Console.WriteLine("Include a file name or multiple file names as parameters");
                 return;
@@ -227,7 +230,7 @@ namespace ImageDetailsCore
 
         private static Options ReadOptions(string optionsFileName, string location)
         {
-            var optionsFile = Path.Combine(location, optionsFileName);
+            var optionsFile = System.IO.Path.Combine(location, optionsFileName);
             if (!File.Exists(optionsFile))
             {
                 return null;
@@ -242,7 +245,7 @@ namespace ImageDetailsCore
             var searchOptions = options.RecursiveFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
             foreach (var file in Directory.GetFiles(folder, "*.*", searchOptions))
             {
-                if (options.FolderSearchExtensions.Any(extension => string.Equals(Path.GetExtension(file), extension, StringComparison.OrdinalIgnoreCase)))
+                if (options.FolderSearchExtensions.Any(extension => string.Equals(System.IO.Path.GetExtension(file), extension, StringComparison.OrdinalIgnoreCase)))
                 {
                     OutputBadge(file, assemblyLocation, options);
                 }
@@ -251,7 +254,7 @@ namespace ImageDetailsCore
 
         private static void OutputBadge(string file, string assemblyLocation, Options options)
         {
-            Func<string, string, TagLocator> Locator = (directory, tag) => new TagLocator { Directory = directory, Tag = tag };
+            static TagLocator Locator(string directory, string tag) => new() { Directory = directory, Tag = tag };
 
             try
             {
@@ -338,7 +341,7 @@ namespace ImageDetailsCore
 
                 if (camera == "unknown")
                 {
-                    Console.WriteLine("ERR: Could not find camera for {0}", Path.GetFileName(file));
+                    Console.WriteLine("ERR: Could not find camera for {0}", System.IO.Path.GetFileName(file));
                     return;
                 }
 
@@ -361,7 +364,7 @@ namespace ImageDetailsCore
                 {
                     if (options.WarnMissingCamera)
                     {
-                        Console.WriteLine("WARN: Could not map camera '{0}' s/n '{1}' in {2}", camera, cameraSerial, Path.GetFileName(file));
+                        Console.WriteLine("WARN: Could not map camera '{0}' s/n '{1}' in {2}", camera, cameraSerial, System.IO.Path.GetFileName(file));
                     }
                 }
 
@@ -392,13 +395,13 @@ namespace ImageDetailsCore
                 {
                     if (options.WarnMissingCamera)
                     {
-                        Console.WriteLine("WARN: Could not map lens '{0}' s/n '{1}' in {2}", lens, lensSerial, Path.GetFileName(file));
+                        Console.WriteLine("WARN: Could not map lens '{0}' s/n '{1}' in {2}", lens, lensSerial, System.IO.Path.GetFileName(file));
                     }
                 }
                 lens = lens.Replace("f/", "ƒ/").Replace("F/", "ƒ/").Replace("F_", "ƒ/");
 
                 // Fix up shutter speed
-                if (shutterSpeed.Contains("."))
+                if (shutterSpeed.Contains('.'))
                 {
                     var decimalValue = double.Parse(shutterSpeed[0..^1]);
                     if (decimalValue < 1)
@@ -418,10 +421,10 @@ namespace ImageDetailsCore
                 }
                 if (whiteBalance.Length > 24)
                 {
-                    int position = whiteBalance.Substring(0, 24).LastIndexOf(' ');
+                    int position = whiteBalance[..24].LastIndexOf(' ');
                     if (position >= 0)
                     {
-                        whiteBalance = whiteBalance.Substring(0, position);
+                        whiteBalance = whiteBalance[..position];
                     }
                 }
 
@@ -436,10 +439,10 @@ namespace ImageDetailsCore
                 }
                 if (exposureProgram.Length > 24)
                 {
-                    int position = exposureProgram.Substring(0, 24).LastIndexOf(' ');
+                    int position = exposureProgram[..24].LastIndexOf(' ');
                     if (position >= 0)
                     {
-                        exposureProgram = exposureProgram.Substring(0, position);
+                        exposureProgram = exposureProgram[..position];
                     }
                 }
 
@@ -474,79 +477,164 @@ namespace ImageDetailsCore
                         theme = themeData["canon"];
                     }
                 }
-                var imageLocation = Path.Combine(assemblyLocation, theme.ImageLocation);
+                var imageLocation = System.IO.Path.Combine(assemblyLocation, theme.ImageLocation);
 
                 var drawingScale = options.UseScaling ? 4 : 1;
 
-                using var bitmap = new Bitmap(480 * drawingScale, 300 * drawingScale, PixelFormat.Format32bppArgb);
-                using (var graphics = Graphics.FromImage(bitmap))
+                using (var image = new Image<Rgba32>(480 * drawingScale, 300 * drawingScale))
                 {
-                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-                    graphics.SmoothingMode = SmoothingMode.HighQuality;
-                    graphics.CompositingQuality = CompositingQuality.HighQuality;
-                    graphics.Clear(Color.Transparent);
-
-                    // Draw the plaque
-                    DrawRoundedRect(graphics, drawingScale, 2, 2, 476, 296, theme.BackgroundBrush, 13, 13);
-                    DrawRoundedRect(graphics, drawingScale, 12, 12, 456, 276, theme.BorderBrush, 9, 9);
-                    DrawRoundedRect(graphics, drawingScale, 15, 15, 450, 270, theme.BackgroundBrush, 8, 8);
-
-                    // Draw the camera
-                    DrawValue(graphics, theme, drawingScale, 14, 32, 28, 33, Path.Combine(imageLocation, @"camera.png"), "CAMERA", camera, FontStyle.Bold, theme.CameraForegroundBrush);
-
-                    // Draw the lens
-                    DrawValue(graphics, theme, drawingScale, 11, 28, 28, 78, Path.Combine(imageLocation, @"lens.png"), "LENS", lens);
-
-                    // Draw the focal length
-                    DrawValue(graphics, theme, drawingScale, 11, 28, 28, 118, Path.Combine(imageLocation, @"ruler.png"), "FOCAL LENGTH", focalLength);
-
-                    // Draw the ISO
-                    DrawValue(graphics, theme, drawingScale, 11, 28, 240, 118, Path.Combine(imageLocation, @"film.png"), "ISO", ISO);
-
-                    // Draw the exposure
-                    DrawValue(graphics, theme, drawingScale, 11, 28, 28, 158, Path.Combine(imageLocation, @"aperture.png"), "EXPOSURE", string.Format("{0} @ {1}", shutterSpeed, aperture));
-
-                    // Draw the exposure bias
-                    DrawValue(graphics, theme, drawingScale, 11, 28, 240, 158, Path.Combine(imageLocation, @"bias.png"), "EXPOSURE BIAS", exposureBias);
-
-                    // Draw the white balance
-                    DrawValue(graphics, theme, drawingScale, 11, 28, 28, 198, Path.Combine(imageLocation, @"whitebalance.png"), "WHITE BALANCE", whiteBalance);
-
-                    // Draw the exposure program
-                    DrawValue(graphics, theme, drawingScale, 11, 28, 240, 198, Path.Combine(imageLocation, @"exposure.png"), "EXPOSURE PROGRAM", exposureProgram);
-
-                    if (options.SkipDate)
+                    image.Mutate(imageContext =>
                     {
-                        // Draw the date
-                        DrawValue(graphics, theme, drawingScale, 11, 28, 28, 238, Path.Combine(imageLocation, @"artist.png"), "ARTIST", artist);
+                        // Draw the plaque.
+                        imageContext = DrawRoundedRect(imageContext, drawingScale, image, 2, 13, theme.BackgrounColor);
+                        imageContext = DrawRoundedRect(imageContext, drawingScale, image, 12, 9, theme.BorderColor);
+                        imageContext = DrawRoundedRect(imageContext, drawingScale, image, 15, 7, theme.BackgrounColor);
+
+                        // Draw the camera.
+                        imageContext = DrawValue(imageContext, drawingScale, 14, 32, 28, 33, System.IO.Path.Combine(imageLocation, @"camera.png"), "CAMERA", camera, FontStyle.Bold, theme.CameraForegroundColor, theme.LabelColor);
+
+                        // Draw the lens
+                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 78, System.IO.Path.Combine(imageLocation, @"lens.png"), "LENS", lens, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+
+                        // Draw the focal length
+                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 118, System.IO.Path.Combine(imageLocation, @"ruler.png"), "FOCAL LENGTH", focalLength, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+
+                        // Draw the ISO
+                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 240, 118, System.IO.Path.Combine(imageLocation, @"film.png"), "ISO", ISO, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+
+                        // Draw the exposure
+                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 158, System.IO.Path.Combine(imageLocation, @"aperture.png"), "EXPOSURE", string.Format("{0} @ {1}", shutterSpeed, aperture), FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+
+                        // Draw the exposure bias
+                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 240, 158, System.IO.Path.Combine(imageLocation, @"bias.png"), "EXPOSURE BIAS", exposureBias, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+
+                        // Draw the white balance
+                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 198, System.IO.Path.Combine(imageLocation, @"whitebalance.png"), "WHITE BALANCE", whiteBalance, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+
+                        // Draw the exposure program
+                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 240, 198, System.IO.Path.Combine(imageLocation, @"exposure.png"), "EXPOSURE PROGRAM", exposureProgram, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+
+                        if (options.SkipDate)
+                        {
+                            // Draw the date
+                            imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 238, System.IO.Path.Combine(imageLocation, @"artist.png"), "ARTIST", artist, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                        }
+                        else
+                        {
+                            // Draw the date
+                            imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 238, System.IO.Path.Combine(imageLocation, @"calendar.png"), "DATE", dateTimeOriginal, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+
+                            // Draw the time
+                            imageContext = DrawValue(imageContext, drawingScale, 11, 28, 240, 238, System.IO.Path.Combine(imageLocation, @"artist.png"), "ARTIST", artist, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                        }
+                    });
+                    var output = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(file), System.IO.Path.GetFileNameWithoutExtension(file) + "_info.png");
+                    var layer = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(file), System.IO.Path.GetFileNameWithoutExtension(file) + ".png");
+                    if (File.Exists(layer))
+                    {
+                        using var layerImage = Image.Load(layer);
+                        using var resultImage = new Image<Rgba32>(500 * drawingScale, 320 * drawingScale);
+                        resultImage.Mutate(imageContext =>
+                        {
+                            imageContext = imageContext.Fill(theme.BackgrounColor);
+
+                            //Console.WriteLine("Result image: {0} x {1}", resultImage.Width, resultImage.Height);
+                            var scaleX = (float)resultImage.Width / layerImage.Width;
+                            var scaleY = (float)resultImage.Height / layerImage.Height;
+                            var resultScale = Math.Max(scaleX, scaleY);
+                            //Console.WriteLine("Scale: X: {0}, Y: {1}", scaleX, scaleY);
+                            var newLayerImageWidth = (int)(layerImage.Width * resultScale);
+                            //Console.WriteLine("New layer width: {0}", newLayerImageWidth);
+                            var left = (resultImage.Width - newLayerImageWidth) / 2;
+                            //Console.WriteLine("Left: {0}", left);
+                            var newLayerImageHeight = (int)(layerImage.Height * resultScale);
+                            //Console.WriteLine("New layer height: {0}", newLayerImageHeight);
+                            var top = (resultImage.Height - newLayerImageHeight) / 2;
+                            //Console.WriteLine("Top: {0}", top);
+                            layerImage.Mutate(layerImageContext =>
+                            {
+                                layerImageContext = layerImageContext.Resize(newLayerImageWidth, newLayerImageHeight);
+                            });
+                            imageContext = imageContext.DrawImage(
+                                layerImage,
+                                new Point(left, top),
+                                new Rectangle((layerImage.Width - resultImage.Width) / 2, (layerImage.Height - resultImage.Height) / 2, Math.Min(layerImage.Width, resultImage.Width), Math.Min(resultImage.Height, layerImage.Height)),
+                                1f);
+
+                            imageContext = imageContext.GaussianBlur(30);
+
+                            imageContext = imageContext.DrawImage(image, new Point(10 * drawingScale, 10 * drawingScale), 0.85f);
+                        });
+                        resultImage.SaveAsPng(output);
                     }
                     else
                     {
-                        // Draw the date
-                        DrawValue(graphics, theme, drawingScale, 11, 28, 28, 238, Path.Combine(imageLocation, @"calendar.png"), "DATE", dateTimeOriginal);
-
-                        // Draw the time
-                        DrawValue(graphics, theme, drawingScale, 11, 28, 240, 238, Path.Combine(imageLocation, @"artist.png"), "ARTIST", artist);
+                        image.SaveAsPng(output);
                     }
-                }
-                var output = Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file) + "_info.png");
-                if (options.UseScaling)
-                {
-                    using var result = ResizeImage(bitmap, 480 * 2, 300 * 2);
-                    result.Save(output, ImageFormat.Png);
-                }
-                else
-                {
-                    bitmap.Save(output, ImageFormat.Png);
-                }
+                };
 
-                Console.WriteLine("Processed {0}...", Path.GetFileName(file));
+                Console.WriteLine("Processed {0}...", System.IO.Path.GetFileName(file));
             }
             catch (Exception exception)
             {
-                Console.WriteLine("Failed to process {0}: {1}", Path.GetFileName(file), exception.Message);
+                Console.WriteLine("Failed to process {0}: {1}", System.IO.Path.GetFileName(file), exception.Message);
             }
+        }
+
+        private static IImageProcessingContext DrawValue(
+            IImageProcessingContext imageContext,
+            int drawingScale,
+            int fontSize,
+            int imageSize,
+            int x,
+            int y,
+            string image,
+            string label,
+            string value,
+            FontStyle fontStyle,
+            Color color,
+            Color labelColor)
+        {
+            float scale(float value) => drawingScale * value;
+            using (var valueImage = Image.Load(image))
+            {
+                valueImage.Mutate(x => x.Resize((int)scale(imageSize), (int)scale(imageSize)));
+                imageContext = imageContext.DrawImage(valueImage, new Point((int)scale(x), (int)scale(y)), 0.8f);
+            }
+
+            var labelTextOptions = new RichTextOptions(SystemFonts.CreateFont("Arial", scale(7), FontStyle.Bold))
+            {
+                Origin = new PointF(scale(x + 36), scale(y)),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top,
+            };
+            imageContext = imageContext.DrawText(labelTextOptions, label, labelColor);
+
+            var valueTextOptions = new RichTextOptions(SystemFonts.CreateFont("Candara", scale(fontSize), fontStyle))
+            {
+                Origin = new PointF(scale(x + 36), scale(y + 10)),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top,
+            };
+            imageContext = imageContext.DrawText(valueTextOptions, value, color);
+
+            return imageContext;
+        }
+
+        private static IImageProcessingContext DrawRoundedRect(
+            IImageProcessingContext imageContext,
+            int drawingScale,
+            Image<Rgba32> image,
+            int offset,
+            int cornerRadius,
+            Color color)
+        {
+            float scale(float value) => drawingScale * value;
+            foreach (IPath path in BuildCorners(image.Width - (int)scale(offset * 2), image.Height - (int)scale(offset * 2), scale(cornerRadius)))
+            {
+                imageContext = imageContext.Fill(color, path.Translate(scale(offset), scale(offset)));
+            }
+            return imageContext;
         }
 
         class TagLocator
@@ -575,61 +663,17 @@ namespace ImageDetailsCore
             return null;
         }
 
-        private static void DrawValue(Graphics graphics, ThemeData theme, int scale, int fontSize, int imageSize, int x, int y, string image, string label, string value, FontStyle fontStyle = FontStyle.Regular, Brush valueBrush = null)
+        private static IPathCollection BuildCorners(int imageWidth, int imageHeight, float cornerRadius)
         {
-            using (var resImage = new Bitmap(image))
-            {
-                graphics.DrawImage(resImage, x * scale, y * scale, imageSize * scale, imageSize * scale);
-            }
-            using (var font = new Font("Arial", 7 * scale, FontStyle.Bold))
-            {
-                graphics.DrawString(label, font, theme.LabelBrush, (x + 36) * scale, y * scale);
-            }
-            using (var font = new Font("Candara", fontSize * scale, fontStyle))
-            {
-                graphics.DrawString(value, font, valueBrush ?? theme.ForegroundBrush, (x + 36) * scale, (y + 10) * scale);
-            }
-        }
-
-        private static void DrawRoundedRect(Graphics graphics, int scale, int left, int top, int width, int height, Brush brush, int radiusX, int radiusY)
-        {
-            radiusX *= scale;
-            radiusY *= scale;
-            int diameterX = 2 * radiusX;
-            int diameterY = 2 * radiusY;
-            left *= scale;
-            top *= scale;
-            width *= scale;
-            height *= scale;
-
-            graphics.FillRectangle(brush, left + radiusX, top, width - diameterX, height);
-            graphics.FillRectangle(brush, left, top + radiusY, width, height - diameterY);
-            graphics.FillEllipse(brush, left, top, diameterX, diameterY);
-            graphics.FillEllipse(brush, left + width - diameterY, top, diameterX, diameterY);
-            graphics.FillEllipse(brush, left, top + height - diameterY, diameterX, diameterY);
-            graphics.FillEllipse(brush, left + width - diameterY, top + height - diameterY, diameterX, diameterY);
-        }
-
-        public static Bitmap ResizeImage(Image image, int width, int height)
-        {
-            var destRect = new Rectangle(0, 0, width, height);
-            var destImage = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-
-            using (var graphics = Graphics.FromImage(destImage))
-            {
-                graphics.CompositingMode = CompositingMode.SourceCopy;
-                graphics.CompositingQuality = CompositingQuality.HighQuality;
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.SmoothingMode = SmoothingMode.HighQuality;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-                using var wrapMode = new ImageAttributes();
-                wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                graphics.Clear(Color.Transparent);
-                graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
-            }
-
-            return destImage;
+            var rectHoriz = new RectangularPolygon(-0.5f, cornerRadius - 0.5f, imageWidth, imageHeight - cornerRadius * 2);
+            var rectVert = new RectangularPolygon(cornerRadius - 0.5f, -0.5f, imageWidth - cornerRadius * 2, imageHeight);
+            var cornerTopLeft = new EllipsePolygon(cornerRadius - 0.5f, cornerRadius - 0.5f, cornerRadius);
+            var rightPos = imageWidth - cornerTopLeft.Bounds.Width;
+            var bottomPos = imageHeight - cornerTopLeft.Bounds.Height;
+            var cornerTopRight = cornerTopLeft.Translate(rightPos, 0);
+            var cornerBottomLeft = cornerTopLeft.Translate(0, bottomPos);
+            var cornerBottomRight = cornerTopLeft.Translate(rightPos, bottomPos);
+            return new PathCollection(rectHoriz, rectVert, cornerTopLeft, cornerTopRight, cornerBottomLeft, cornerBottomRight);
         }
     }
 }
