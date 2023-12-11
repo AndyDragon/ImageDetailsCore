@@ -34,9 +34,9 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.Fonts;
-using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats.Bmp;
 
 namespace ImageDetailsCore
 {
@@ -63,6 +63,7 @@ namespace ImageDetailsCore
         public bool SkipDate { get; set; }
         public IList<MapValue> Cameras { get; set; }
         public IList<MapValue> Lenses { get; set; }
+        public bool DumpMetadata { get; set; }
     }
 
     class MapValue
@@ -213,7 +214,11 @@ namespace ImageDetailsCore
             // Enumerate the files / folders and output the badges.
             foreach (var arg in args)
             {
-                if (File.Exists(arg))
+                if (arg == "-dump")
+                {
+                    options.DumpMetadata = true;
+                }
+                else if (File.Exists(arg))
                 {
                     OutputBadge(arg, location, options);
                 }
@@ -259,9 +264,7 @@ namespace ImageDetailsCore
             try
             {
                 IEnumerable<MetadataExtractor.Directory> directories = MetadataExtractor.ImageMetadataReader.ReadMetadata(file);
-                // Change the following line to dump the EXIF data to the console.
-                var dumpExif = false;
-                if (dumpExif)
+                if (options.DumpMetadata)
                 {
                     foreach (var directory in directories)
                         foreach (var tag in directory.Tags)
@@ -296,8 +299,11 @@ namespace ImageDetailsCore
                     Locator("Exif SubIFD", "Focal Length 35"),
                 }) ?? "n/a").Replace(" mm", "mm");
 
-                var ISO = GetStringValue(directories, new[] {
+                var iso = GetStringValue(directories, new[] {
                     Locator("Exif SubIFD", "ISO Speed Ratings"),
+                }) ?? "n/a";
+                var nikonIsoInfo = GetStringValue(directories, new[] {
+                    Locator("Nikon Makernote", "ISO Info"),
                 }) ?? "n/a";
 
                 var shutterSpeed = (GetStringValue(directories, new[] {
@@ -446,6 +452,79 @@ namespace ImageDetailsCore
                     }
                 }
 
+                // Fix up exposure bias
+                if (exposureBias.Contains("/-"))
+                {
+                    exposureBias = "-" + exposureBias.Replace("/-", "/");
+                }
+
+                // Fix up ISO
+                if (iso == "n/a" && nikonIsoInfo != "n/a")
+                {
+                    var parts = nikonIsoInfo.Split(' ', StringSplitOptions.TrimEntries);
+                    if (parts.Length == 14)
+                    {
+                        var code2 = int.Parse(parts[4]) * 256 + int.Parse(parts[5]);
+                        //Console.WriteLine("Code 2: {0}", code2);
+                        var isoCode2s = new Dictionary<int, string>
+                        {
+                            { 0x0, "Off" },
+                            { 0x101, "Hi 0.3" },
+                            { 0x102, "Hi 0.5" },
+                            { 0x103, "Hi 0.7" },
+                            { 0x104, "Hi 1.0" },
+                            { 0x105, "Hi 1.3" },
+                            { 0x106, "Hi 1.5" },
+                            { 0x107, "Hi 1.7" },
+                            { 0x108, "Hi 2.0" },
+                            { 0x201, "Lo 0.3" },
+                            { 0x202, "Lo 0.5" },
+                            { 0x203, "Lo 0.7" },
+                            { 0x204, "Lo 1.0" },
+                        };
+                        if (isoCode2s.ContainsKey(code2))
+                        {
+                            iso = isoCode2s[code2];
+                        }
+                        else
+                        {
+                            var code = int.Parse(parts[1]) * 256 + int.Parse(parts[2]);
+                            var isoCodes = new Dictionary<int, string>
+                            {
+                                { 0x0, "Off" },
+                                { 0x101, "Hi 0.3" },
+                                { 0x102, "Hi 0.5" },
+                                { 0x103, "Hi 0.7" },
+                                { 0x104, "Hi 1.0" },
+                                { 0x105, "Hi 1.3" },
+                                { 0x106, "Hi 1.5" },
+                                { 0x107, "Hi 1.7" },
+                                { 0x108, "Hi 2.0" },
+                                { 0x109, "Hi 2.3" },
+                                { 0x10a, "Hi 2.5" },
+                                { 0x10b, "Hi 2.7" },
+                                { 0x10c, "Hi 3.0" },
+                                { 0x10d, "Hi 3.3" },
+                                { 0x10e, "Hi 3.5" },
+                                { 0x10f, "Hi 3.7" },
+                                { 0x110, "Hi 4.0" },
+                                { 0x111, "Hi 4.3" },
+                                { 0x112, "Hi 4.5" },
+                                { 0x113, "Hi 4.7" },
+                                { 0x114, "Hi 5.0" },
+                                { 0x201, "Lo 0.3" },
+                                { 0x202, "Lo 0.5" },
+                                { 0x203, "Lo 0.7" },
+                                { 0x204, "Lo 1.0" },
+                            };
+                            if (isoCodes.ContainsKey(code))
+                            {
+                                iso = isoCodes[code];
+                            }
+                        }
+                    }
+                }
+
                 if (!themeData.ContainsKey(options.Theme))
                 {
                     options.Theme = "black";
@@ -500,7 +579,7 @@ namespace ImageDetailsCore
                         imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 118, System.IO.Path.Combine(imageLocation, @"ruler.png"), "FOCAL LENGTH", focalLength, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
 
                         // Draw the ISO
-                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 240, 118, System.IO.Path.Combine(imageLocation, @"film.png"), "ISO", ISO, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 240, 118, System.IO.Path.Combine(imageLocation, @"film.png"), "ISO", iso, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
 
                         // Draw the exposure
                         imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 158, System.IO.Path.Combine(imageLocation, @"aperture.png"), "EXPOSURE", string.Format("{0} @ {1}", shutterSpeed, aperture), FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
