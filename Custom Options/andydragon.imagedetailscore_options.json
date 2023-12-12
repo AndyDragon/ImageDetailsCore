@@ -114,10 +114,12 @@
     { "source": "14.0-45.0 mm f/3.5-5.6",                           "display": "OLYMPUS M.Zuiko 14-45mm f/3.5-5.6" },
     { "source": "Olympus Zuiko Digital 14-45mm f/3.5-5.6",          "display": "OLYMPUS M.Zuiko 14-45mm f/3.5-5.6" },
     { "source": "OLYMPUS 14-45mm Lens",                             "display": "OLYMPUS M.Zuiko 14-45mm f/3.5-5.6" },
+    { "source": "Olympus Zuiko Digital 14-45mm F3.5-5.6",           "display": "OLYMPUS M.Zuiko 14-45mm f/3.5-5.6" },
 
     { "source": "40.0-150.0 mm f/3.5-4.5",                          "display": "OLYMPUS M.Zuiko 40-150mm f/3.5-4.5" },
     { "source": "Olympus Zuiko Digital 40-150mm f/3.5-4.5",         "display": "OLYMPUS M.Zuiko 40-150mm f/3.5-4.5" },
     { "source": "OLYMPUS 40-150mm Lens",                            "display": "OLYMPUS M.Zuiko 40-150mm f/3.5-4.5" },
+    { "source": "Olympus Zuiko Digital 40-150mm F3.5-4.5",          "display": "OLYMPUS M.Zuiko 40-150mm f/3.5-4.5" },
 
     { "source": "OLYMPUS M.100-400mm F5.0-6.3",                     "display": "OLYMPUS M.Zuiko 100-400mm f/5-6.3" },
     { "source": "M.100-400mm F5.0-6.3 + MC-14",                     "display": "OLYMPUS M.Zuiko 100-400mm f/5-6.3 + 1.4x TC" },

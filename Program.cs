@@ -328,6 +328,7 @@ namespace ImageDetailsCore
                     Locator("Exif SubIFD", "Lens Model"),
                     Locator("Nikon Makernote", "Lens"),
                     Locator("Exif SubIFD", "Lens Specification"),
+                    Locator("Olympus Equipment", "Lens Type"),
                 }) ?? "n/a";
 
                 var lensSerial = GetStringValue(directories, new[] {
