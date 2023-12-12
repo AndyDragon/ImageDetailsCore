@@ -36,7 +36,6 @@ using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Formats.Bmp;
 
 namespace ImageDetailsCore
 {
@@ -54,6 +53,7 @@ namespace ImageDetailsCore
     {
         public bool WarnMissingCamera { get; set; }
         public bool WarnMissingLens { get; set; }
+        public bool WarnMissingValues { get; set; }
         public bool RecursiveFolders { get; set; }
         public string Theme { get; set; }
         public bool ThemeFromExt { get; set; }
@@ -61,9 +61,11 @@ namespace ImageDetailsCore
         public bool UseScaling { get; set; }
         public string DefaultArtist { get; set; }
         public bool SkipDate { get; set; }
+        public bool SkipOutput { get; set; }
         public IList<MapValue> Cameras { get; set; }
         public IList<MapValue> Lenses { get; set; }
         public bool DumpMetadata { get; set; }
+        public string Output { get; set; }
     }
 
     class MapValue
@@ -212,11 +214,42 @@ namespace ImageDetailsCore
             }
 
             // Enumerate the files / folders and output the badges.
+            var waitingForOutput = false;
             foreach (var arg in args)
             {
                 if (arg == "-dump")
                 {
                     options.DumpMetadata = true;
+                    Console.WriteLine("Turned on dumping metadata");
+                }
+                else if (arg == "-warn")
+                {
+                    options.WarnMissingValues = true;
+                    Console.WriteLine("Turned on warning for missing values");
+                }
+                else if (arg == "-deep")
+                {
+                    options.RecursiveFolders = true;
+                    Console.WriteLine("Turned on recursive folders");
+                }
+                else if (arg == "-skipout")
+                {
+                    options.SkipOutput = true;
+                    Console.WriteLine("Skipping badge output");
+                }
+                else if (arg == "-out")
+                {
+                    waitingForOutput = true;
+                }
+                else if (waitingForOutput)
+                {
+                    waitingForOutput = false;
+                    options.Output = arg;
+                    if (!Directory.Exists(options.Output))
+                    {
+                        Directory.CreateDirectory(options.Output);
+                    }
+                    Console.WriteLine("Set output location to: {0}", options.Output);
                 }
                 else if (File.Exists(arg))
                 {
@@ -230,6 +263,11 @@ namespace ImageDetailsCore
                 {
                     Console.WriteLine("Could not load file {0}...", arg);
                 }
+            }
+
+            if (options.SkipOutput)
+            {
+                Console.WriteLine();
             }
         }
 
@@ -248,7 +286,7 @@ namespace ImageDetailsCore
         private static void OutputFolderBadges(string folder, string assemblyLocation, Options options)
         {
             var searchOptions = options.RecursiveFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-            foreach (var file in Directory.GetFiles(folder, "*.*", searchOptions))
+            foreach (var file in Directory.GetFiles(folder, "*.*", searchOptions).Order())
             {
                 if (options.FolderSearchExtensions.Any(extension => string.Equals(System.IO.Path.GetExtension(file), extension, StringComparison.OrdinalIgnoreCase)))
                 {
@@ -267,9 +305,12 @@ namespace ImageDetailsCore
                 if (options.DumpMetadata)
                 {
                     foreach (var directory in directories)
+                    {
                         foreach (var tag in directory.Tags)
-                            Console.WriteLine($"{directory.Name} - {tag.Name} = {tag.Description}");
-                    return;
+                        {
+                            Console.WriteLine($"{directory.Name} - {tag.Name} (0x{tag.Type:x4}) = {tag.Description}");
+                        }
+                    }
                 }
 
                 var camera = GetStringValue(directories, new[] {
@@ -286,6 +327,7 @@ namespace ImageDetailsCore
                 var lens = GetStringValue(directories, new[] {
                     Locator("Exif SubIFD", "Lens Model"),
                     Locator("Nikon Makernote", "Lens"),
+                    Locator("Exif SubIFD", "Lens Specification"),
                 }) ?? "n/a";
 
                 var lensSerial = GetStringValue(directories, new[] {
@@ -341,12 +383,17 @@ namespace ImageDetailsCore
                     Locator("Exif IFD0", "Artist"),
                     Locator("Exif SubIFD", "Artist"),
                 }) ?? options.DefaultArtist ?? "n/a";
-                if (artist.Length == 0) {
+                if (artist.Length == 0)
+                {
                     artist = options.DefaultArtist ?? "n/a";
                 }
 
                 if (camera == "unknown")
                 {
+                    if (options.SkipOutput)
+                    {
+                        Console.WriteLine();
+                    }
                     Console.WriteLine("ERR: Could not find camera for {0}", System.IO.Path.GetFileName(file));
                     return;
                 }
@@ -370,7 +417,15 @@ namespace ImageDetailsCore
                 {
                     if (options.WarnMissingCamera)
                     {
+                        if (options.SkipOutput)
+                        {
+                            Console.WriteLine();
+                        }
                         Console.WriteLine("WARN: Could not map camera '{0}' s/n '{1}' in {2}", camera, cameraSerial, System.IO.Path.GetFileName(file));
+                        if (camera.Length == 0)
+                        {
+                            camera = "n/a";
+                        }
                     }
                 }
 
@@ -401,7 +456,15 @@ namespace ImageDetailsCore
                 {
                     if (options.WarnMissingCamera)
                     {
+                        if (options.SkipOutput)
+                        {
+                            Console.WriteLine();
+                        }
                         Console.WriteLine("WARN: Could not map lens '{0}' s/n '{1}' in {2}", lens, lensSerial, System.IO.Path.GetFileName(file));
+                        if (lens.Length == 0)
+                        {
+                            lens = "n/a";
+                        }
                     }
                 }
                 lens = lens.Replace("f/", "ƒ/").Replace("F/", "ƒ/").Replace("F_", "ƒ/");
@@ -525,13 +588,80 @@ namespace ImageDetailsCore
                     }
                 }
 
+                if (options.WarnMissingValues)
+                {
+                    if (focalLength == "n/a")
+                    {
+                        if (options.SkipOutput)
+                        {
+                            Console.WriteLine();
+                        }
+                        Console.WriteLine("WARN: missing 'focal length' in {0}", System.IO.Path.GetFileName(file));
+                    }
+                    if (iso == "n/a")
+                    {
+                        if (options.SkipOutput)
+                        {
+                            Console.WriteLine();
+                        }
+                        Console.WriteLine("WARN: missing 'iso' in {0}", System.IO.Path.GetFileName(file));
+                    }
+                    if (shutterSpeed == "n/a")
+                    {
+                        if (options.SkipOutput)
+                        {
+                            Console.WriteLine();
+                        }
+                        Console.WriteLine("WARN: missing 'shutter speed' in {0}", System.IO.Path.GetFileName(file));
+                    }
+                    if (aperture == "n/a")
+                    {
+                        if (options.SkipOutput)
+                        {
+                            Console.WriteLine();
+                        }
+                        Console.WriteLine("WARN: missing 'aperture' in {0}", System.IO.Path.GetFileName(file));
+                    }
+                    if (exposureBias == "n/a")
+                    {
+                        if (options.SkipOutput)
+                        {
+                            Console.WriteLine();
+                        }
+                        Console.WriteLine("WARN: missing 'exposure bias' in {0}", System.IO.Path.GetFileName(file));
+                    }
+                    if (whiteBalance == "n/a")
+                    {
+                        if (options.SkipOutput)
+                        {
+                            Console.WriteLine();
+                        }
+                        Console.WriteLine("WARN: missing 'white balance' in {0}", System.IO.Path.GetFileName(file));
+                    }
+                    if (exposureProgram == "n/a")
+                    {
+                        if (options.SkipOutput)
+                        {
+                            Console.WriteLine();
+                        }
+                        Console.WriteLine("WARN: missing 'exposure program' in {0}", System.IO.Path.GetFileName(file));
+                    }
+                }
+
+                if (options.SkipOutput)
+                {
+                    Console.Write(".");
+                    return;
+                }
+
                 if (!themeData.ContainsKey(options.Theme))
                 {
                     options.Theme = "black";
                 }
 
                 var theme = themeData[options.Theme];
-                if (options.ThemeFromExt) {
+                if (options.ThemeFromExt)
+                {
                     if (System.IO.Path.GetExtension(file).ToLower() == ".nef")
                     {
                         theme = themeData["nikon"];
@@ -556,6 +686,7 @@ namespace ImageDetailsCore
                         theme = themeData["canon"];
                     }
                 }
+
                 var imageLocation = System.IO.Path.Combine(assemblyLocation, theme.ImageLocation);
 
                 var drawingScale = options.UseScaling ? 4 : 1;
@@ -607,7 +738,7 @@ namespace ImageDetailsCore
                             imageContext = DrawValue(imageContext, drawingScale, 11, 28, 240, 238, System.IO.Path.Combine(imageLocation, @"artist.png"), "ARTIST", artist, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
                         }
                     });
-                    var output = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(file), System.IO.Path.GetFileNameWithoutExtension(file) + "_info.png");
+                    var output = System.IO.Path.Combine(options.Output ?? System.IO.Path.GetDirectoryName(file), System.IO.Path.GetFileNameWithoutExtension(file) + "_info.png");
                     var layer = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(file), System.IO.Path.GetFileNameWithoutExtension(file) + ".png");
                     if (File.Exists(layer))
                     {
@@ -726,7 +857,7 @@ namespace ImageDetailsCore
                     if (directory != null)
                     {
                         var tag = directory.Tags.FirstOrDefault(tag => tag.Name == locator.Tag);
-                        if (tag != null)
+                        if (tag != null && !string.IsNullOrEmpty(tag.Description))
                         {
                             return tag.Description;
                         }
