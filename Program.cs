@@ -37,7 +37,6 @@ using SixLabors.Fonts;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using MetadataExtractor;
-//using MetadataExtractor.Formats;
 
 namespace ImageDetailsCore
 {
@@ -303,7 +302,7 @@ namespace ImageDetailsCore
 
             try
             {
-                IEnumerable<MetadataExtractor.Directory> directories = MetadataExtractor.ImageMetadataReader.ReadMetadata(file);
+                IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(file);
                 if (options.DumpMetadata)
                 {
                     foreach (var directory in directories)
@@ -358,6 +357,7 @@ namespace ImageDetailsCore
                     Locator("Nikon Makernote", "Lens"),
                     Locator("Exif SubIFD", "Lens Specification"),
                     Locator("Olympus Equipment", "Lens Type"),
+                    Locator("Olympus Equipment", "Lens Model"),
                 }) ?? "n/a";
 
                 var lensSerial = GetStringValue(directories, new[] {
@@ -408,10 +408,12 @@ namespace ImageDetailsCore
                 var afMode = GetStringValue(directories, new[] {
                     Locator("Nikon Makernote", "AF Type"),
                     Locator("Fujifilm Makernote", "Focus Mode"),
+                    Locator("Olympus Camera Settings", "Focus Mode"),
                 }) ?? "n/a";
 
                 var shootingMode = GetStringValue(directories, new[] {
                     Locator("Nikon Makernote", "Shooting Mode"),
+                    Locator("Olympus Camera Settings", "Drive Mode"),
                 }) ?? "n/a";
 
                 var dateTimeOriginal = GetStringValue(directories, new[] {
@@ -625,6 +627,24 @@ namespace ImageDetailsCore
                             }
                         }
                     }
+                }
+
+                // Fix up shooting mode
+                if (shootingMode.Contains(", PC Control"))
+                {
+                    shootingMode = shootingMode.Replace(", PC Control", "");
+                }
+                if (shootingMode.Contains("PC Control, "))
+                {
+                    shootingMode = shootingMode.Replace("PC Control, ", "");
+                }
+                if (shootingMode.Contains("PC Control"))
+                {
+                    shootingMode = shootingMode.Replace("PC Control", "");
+                }
+                if (string.IsNullOrEmpty(shootingMode))
+                {
+                    shootingMode = "n/a";
                 }
 
                 if (options.WarnMissingValues)
