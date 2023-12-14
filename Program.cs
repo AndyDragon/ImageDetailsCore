@@ -630,22 +630,11 @@ namespace ImageDetailsCore
                 }
 
                 // Fix up shooting mode
-                if (shootingMode.Contains(", PC Control"))
+                shootingMode = RemoveStringTerms(shootingMode, new List<string>()
                 {
-                    shootingMode = shootingMode.Replace(", PC Control", "");
-                }
-                if (shootingMode.Contains("PC Control, "))
-                {
-                    shootingMode = shootingMode.Replace("PC Control, ", "");
-                }
-                if (shootingMode.Contains("PC Control"))
-                {
-                    shootingMode = shootingMode.Replace("PC Control", "");
-                }
-                if (string.IsNullOrEmpty(shootingMode))
-                {
-                    shootingMode = "n/a";
-                }
+                    "pc control",
+                    ">shot ",
+                });
 
                 if (options.WarnMissingValues)
                 {
@@ -851,6 +840,32 @@ namespace ImageDetailsCore
             {
                 Console.WriteLine("Failed to process {0}: {1}", System.IO.Path.GetFileName(file), exception.Message);
             }
+        }
+
+        private static string RemoveStringTerms(string stringValue, IEnumerable<string> terms)
+        {
+            var stringTerms = stringValue.Split(',', StringSplitOptions.TrimEntries);
+            foreach (var term in terms)
+            {
+                if (term[0] == '>')
+                {
+                    stringTerms = stringTerms.Where(part => !part.ToLower().StartsWith(term[1..])).ToArray<string>();
+                }
+                else if (term[0] == '<')
+                {
+                    stringTerms = stringTerms.Where(part => !part.ToLower().EndsWith(term[1..])).ToArray<string>();
+                }
+                else
+                {
+                    stringTerms = stringTerms.Where(part => !part.ToLower().Equals(term)).ToArray<string>();
+                }
+            }
+            stringValue = string.Join(", ", stringTerms);
+            if (string.IsNullOrEmpty(stringValue))
+            {
+                stringValue = "n/a";
+            }
+            return stringValue;
         }
 
         private static IImageProcessingContext DrawValue(
