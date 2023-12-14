@@ -36,6 +36,8 @@ using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using MetadataExtractor;
+//using MetadataExtractor.Formats;
 
 namespace ImageDetailsCore
 {
@@ -245,9 +247,9 @@ namespace ImageDetailsCore
                 {
                     waitingForOutput = false;
                     options.Output = arg;
-                    if (!Directory.Exists(options.Output))
+                    if (!System.IO.Directory.Exists(options.Output))
                     {
-                        Directory.CreateDirectory(options.Output);
+                        System.IO.Directory.CreateDirectory(options.Output);
                     }
                     Console.WriteLine("Set output location to: {0}", options.Output);
                 }
@@ -255,7 +257,7 @@ namespace ImageDetailsCore
                 {
                     OutputBadge(arg, location, options);
                 }
-                else if (Directory.Exists(arg))
+                else if (System.IO.Directory.Exists(arg))
                 {
                     OutputFolderBadges(arg, location, options);
                 }
@@ -286,7 +288,7 @@ namespace ImageDetailsCore
         private static void OutputFolderBadges(string folder, string assemblyLocation, Options options)
         {
             var searchOptions = options.RecursiveFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-            foreach (var file in Directory.GetFiles(folder, "*.*", searchOptions).Order())
+            foreach (var file in System.IO.Directory.GetFiles(folder, "*.*", searchOptions).Order())
             {
                 if (options.FolderSearchExtensions.Any(extension => string.Equals(System.IO.Path.GetExtension(file), extension, StringComparison.OrdinalIgnoreCase)))
                 {
@@ -309,6 +311,33 @@ namespace ImageDetailsCore
                         foreach (var tag in directory.Tags)
                         {
                             Console.WriteLine($"{directory.Name} - {tag.Name} (0x{tag.Type:x4}) = {tag.Description}");
+                            //if (directory.Name == "Exif SubIFD" && tag.Name == "Makernote")
+                            //{
+                            //    var byteArray = directory.GetByteArray(tag.Type);
+                            //    if (byteArray != null)
+                            //    {
+                            //        const int rowSize = 32;
+                            //        for (var index = 0; index < byteArray.Length; index += rowSize)
+                            //        {
+                            //            var hexPad = "";
+                            //            var charPad = "";
+                            //            for (var byteIndex = 0; byteIndex < rowSize; byteIndex++)
+                            //            {
+                            //                if (index + byteIndex < byteArray.Length)
+                            //                {
+                            //                    hexPad += byteArray[index + byteIndex].ToString("x2") + " ";
+                            //                    charPad += char.IsControl((char)byteArray[index + byteIndex]) ? "." : (char)byteArray[index + byteIndex];
+                            //                }
+                            //                else
+                            //                {
+                            //                    hexPad += "   ";
+                            //                    charPad += " ";
+                            //                }
+                            //            }
+                            //            Console.WriteLine("\t{0} - {1}", hexPad, charPad);
+                            //        }    
+                            //    }
+                            //}
                         }
                     }
                 }
@@ -374,6 +403,15 @@ namespace ImageDetailsCore
 
                 var whiteBalance = GetStringValue(directories, new[] {
                     Locator("Exif SubIFD", "White Balance"),
+                }) ?? "n/a";
+
+                var afMode = GetStringValue(directories, new[] {
+                    Locator("Nikon Makernote", "AF Type"),
+                    Locator("Fujifilm Makernote", "Focus Mode"),
+                }) ?? "n/a";
+
+                var shootingMode = GetStringValue(directories, new[] {
+                    Locator("Nikon Makernote", "Shooting Mode"),
                 }) ?? "n/a";
 
                 var dateTimeOriginal = GetStringValue(directories, new[] {
@@ -705,25 +743,34 @@ namespace ImageDetailsCore
                         imageContext = DrawValue(imageContext, drawingScale, 14, 32, 28, 33, System.IO.Path.Combine(imageLocation, @"camera.png"), "CAMERA", camera, FontStyle.Bold, theme.CameraForegroundColor, theme.LabelColor);
 
                         // Draw the lens
-                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 78, System.IO.Path.Combine(imageLocation, @"lens.png"), "LENS", lens, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 73, System.IO.Path.Combine(imageLocation, @"lens.png"), "LENS", lens, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
 
                         // Draw the focal length
-                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 118, System.IO.Path.Combine(imageLocation, @"ruler.png"), "FOCAL LENGTH", focalLength, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 106, System.IO.Path.Combine(imageLocation, @"ruler.png"), "FOCAL LENGTH", focalLength, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
 
                         // Draw the ISO
-                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 240, 118, System.IO.Path.Combine(imageLocation, @"film.png"), "ISO", iso, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 220, 106, System.IO.Path.Combine(imageLocation, @"film.png"), "ISO", iso, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
 
                         // Draw the exposure
-                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 158, System.IO.Path.Combine(imageLocation, @"aperture.png"), "EXPOSURE", string.Format("{0} @ {1}", shutterSpeed, aperture), FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 139, System.IO.Path.Combine(imageLocation, @"aperture.png"), "EXPOSURE", string.Format("{0} @ {1}", shutterSpeed, aperture), FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
 
                         // Draw the exposure bias
-                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 240, 158, System.IO.Path.Combine(imageLocation, @"bias.png"), "EXPOSURE BIAS", exposureBias, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 220, 139, System.IO.Path.Combine(imageLocation, @"bias.png"), "EXPOSURE BIAS", exposureBias, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
 
                         // Draw the white balance
-                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 198, System.IO.Path.Combine(imageLocation, @"whitebalance.png"), "WHITE BALANCE", whiteBalance, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 172, System.IO.Path.Combine(imageLocation, @"whitebalance.png"), "WHITE BALANCE", whiteBalance, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
 
                         // Draw the exposure program
-                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 240, 198, System.IO.Path.Combine(imageLocation, @"exposure.png"), "EXPOSURE PROGRAM", exposureProgram, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 220, 172, System.IO.Path.Combine(imageLocation, @"exposure.png"), "EXPOSURE PROGRAM", exposureProgram, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+
+                        // Draw the AF mode
+                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 205, System.IO.Path.Combine(imageLocation, @"focus.png"), "FOCUS MODE", afMode, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+
+                        if (shootingMode != "n/a")
+                        {
+                            // Draw the Shooting mode
+                            imageContext = DrawValue(imageContext, drawingScale, 11, 28, 220, 205, System.IO.Path.Combine(imageLocation, @"shutter.png"), "SHOOTING MODE", shootingMode, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                        }
 
                         if (options.SkipDate)
                         {
@@ -736,7 +783,7 @@ namespace ImageDetailsCore
                             imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 238, System.IO.Path.Combine(imageLocation, @"calendar.png"), "DATE", dateTimeOriginal, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
 
                             // Draw the time
-                            imageContext = DrawValue(imageContext, drawingScale, 11, 28, 240, 238, System.IO.Path.Combine(imageLocation, @"artist.png"), "ARTIST", artist, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                            imageContext = DrawValue(imageContext, drawingScale, 11, 28, 220, 238, System.IO.Path.Combine(imageLocation, @"artist.png"), "ARTIST", artist, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
                         }
                     });
                     var output = System.IO.Path.Combine(options.Output ?? System.IO.Path.GetDirectoryName(file), System.IO.Path.GetFileNameWithoutExtension(file) + "_info.png");
