@@ -368,6 +368,9 @@ namespace ImageDetailsCore
 
                 var focalLength = (GetStringValue(directories, new[] {
                     Locator("Exif SubIFD", "Focal Length"),
+                }) ?? "n/a").Replace(" mm", "mm");
+
+                var focalLength35 = (GetStringValue(directories, new[] {
                     Locator("Exif SubIFD", "Focal Length 35"),
                 }) ?? "n/a").Replace(" mm", "mm");
 
@@ -517,6 +520,23 @@ namespace ImageDetailsCore
                     if (decimalValue < 1)
                     {
                         shutterSpeed = string.Format("1/{0}s", 1 / decimalValue);
+                    }
+                }
+
+                // Fix up focal length
+                if (focalLength35 == "n/a" && camera == "OM SYSTEM OM-1")
+                {
+                    focalLength35 = (float.Parse(focalLength[..^2]) * 2).ToString(".#") + "mm";
+                }
+                if (focalLength != "n/a" && focalLength35 != "n/a")
+                {
+                    var focalLengthValue = float.Parse(focalLength[..^2]);
+                    var focalLength35Value = float.Parse(focalLength35[..^2]);
+                    // If the camera specified a focal length within a small margin either way, consider them
+                    // the same to avoid silly display of same value.
+                    if (focalLength35Value > focalLengthValue - 0.95 && focalLength35Value < focalLengthValue + 0.95)
+                    {
+                        focalLength35 = focalLength;
                     }
                 }
 
@@ -755,7 +775,14 @@ namespace ImageDetailsCore
                         imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 73, System.IO.Path.Combine(imageLocation, @"lens.png"), "LENS", lens, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
 
                         // Draw the focal length
-                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 106, System.IO.Path.Combine(imageLocation, @"ruler.png"), "FOCAL LENGTH", focalLength, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                        if (focalLength35 != "n/a" && focalLength35 != focalLength)
+                        {
+                            imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 106, System.IO.Path.Combine(imageLocation, @"ruler.png"), "FOCAL LENGTH", string.Format("{0} ({1} @ 35mm)", focalLength, focalLength35), FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                        }
+                        else
+                        {
+                            imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 106, System.IO.Path.Combine(imageLocation, @"ruler.png"), "FOCAL LENGTH", focalLength, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                        }
 
                         // Draw the ISO
                         imageContext = DrawValue(imageContext, drawingScale, 11, 28, 220, 106, System.IO.Path.Combine(imageLocation, @"film.png"), "ISO", iso, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
