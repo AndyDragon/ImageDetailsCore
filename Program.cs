@@ -299,6 +299,7 @@ namespace ImageDetailsCore
         private static void OutputBadge(string file, string assemblyLocation, Options options)
         {
             static TagLocator Locator(string directory, string tag) => new() { Directory = directory, Tag = tag };
+            static RawTagLocator RawLocator(string directory, Int32 tag) => new() { Directory = directory, Tag = tag };
 
             try
             {
@@ -418,6 +419,39 @@ namespace ImageDetailsCore
                     Locator("Nikon Makernote", "Shooting Mode"),
                     Locator("Olympus Camera Settings", "Drive Mode"),
                 }) ?? "n/a";
+                if (shootingMode == "n/a" && camera == "GFX100S")
+                {
+                    var driveMode = GetInt32Value(directories, new[] {
+                        RawLocator("Fujifilm Makernote", 0x1103),
+                    });
+                    switch (driveMode)
+                    {
+                        case 0:
+                            shootingMode = "Single";
+                            break;
+                        case 1:
+                            shootingMode = "Continuous Low";
+                            break;
+                        case 2:
+                            shootingMode = "Continuous High";
+                            break;
+                    }
+                    var bracketing = GetStringValue(directories, new[]
+                    {
+                        Locator("Fujifilm Makernote", "Auto Bracketing"),
+                    }) ?? "n/a";
+                    if (bracketing != "n/a" && bracketing != "Off")
+                    {
+                        if (shootingMode == "n/a")
+                        {
+                            shootingMode = "Auto Bracketing";
+                        }
+                        else
+                        {
+                            shootingMode += ", Auto Bracketing";
+                        }
+                    }
+                }
 
                 var dateTimeOriginal = GetStringValue(directories, new[] {
                     Locator("Exif SubIFD", "Date/Time Original"),
@@ -957,6 +991,12 @@ namespace ImageDetailsCore
             public string Tag { get; set; }
         }
 
+        class RawTagLocator
+        {
+            public string Directory { get; set; }
+            public Int32 Tag { get; set; }
+        }
+
         private static string GetStringValue(IEnumerable<MetadataExtractor.Directory> directories, IEnumerable<TagLocator> tagLocators)
         {
             foreach (var locator in tagLocators)
@@ -975,6 +1015,29 @@ namespace ImageDetailsCore
                 }
             }
             return null;
+        }
+
+        private static int GetInt32Value(IEnumerable<MetadataExtractor.Directory> directories, IEnumerable<RawTagLocator> tagLocators)
+        {
+            foreach (var locator in tagLocators)
+            {
+                var locatedDirectories = directories.Where(directory => directory.Name == locator.Directory);
+                foreach (var directory in locatedDirectories)
+                {
+                    if (directory != null)
+                    {
+                        try
+                        {
+                            return directory.GetInt32(locator.Tag);
+                        }
+                        catch
+                        {
+                            return int.MaxValue;
+                        }
+                    }
+                }
+            }
+            return int.MaxValue;
         }
 
         private static IPathCollection BuildCorners(int imageWidth, int imageHeight, float cornerRadius)
