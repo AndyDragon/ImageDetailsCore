@@ -37,7 +37,6 @@ using SixLabors.Fonts;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using MetadataExtractor;
-//using MetadataExtractor.Formats;
 
 namespace ImageDetailsCore
 {
@@ -300,10 +299,11 @@ namespace ImageDetailsCore
         private static void OutputBadge(string file, string assemblyLocation, Options options)
         {
             static TagLocator Locator(string directory, string tag) => new() { Directory = directory, Tag = tag };
+            static RawTagLocator RawLocator(string directory, Int32 tag) => new() { Directory = directory, Tag = tag };
 
             try
             {
-                IEnumerable<MetadataExtractor.Directory> directories = MetadataExtractor.ImageMetadataReader.ReadMetadata(file);
+                IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(file);
                 if (options.DumpMetadata)
                 {
                     foreach (var directory in directories)
@@ -358,6 +358,7 @@ namespace ImageDetailsCore
                     Locator("Nikon Makernote", "Lens"),
                     Locator("Exif SubIFD", "Lens Specification"),
                     Locator("Olympus Equipment", "Lens Type"),
+                    Locator("Olympus Equipment", "Lens Model"),
                 }) ?? "n/a";
 
                 var lensSerial = GetStringValue(directories, new[] {
@@ -368,6 +369,9 @@ namespace ImageDetailsCore
 
                 var focalLength = (GetStringValue(directories, new[] {
                     Locator("Exif SubIFD", "Focal Length"),
+                }) ?? "n/a").Replace(" mm", "mm");
+
+                var focalLength35 = (GetStringValue(directories, new[] {
                     Locator("Exif SubIFD", "Focal Length 35"),
                 }) ?? "n/a").Replace(" mm", "mm");
 
@@ -408,11 +412,46 @@ namespace ImageDetailsCore
                 var afMode = GetStringValue(directories, new[] {
                     Locator("Nikon Makernote", "AF Type"),
                     Locator("Fujifilm Makernote", "Focus Mode"),
+                    Locator("Olympus Camera Settings", "Focus Mode"),
                 }) ?? "n/a";
 
                 var shootingMode = GetStringValue(directories, new[] {
                     Locator("Nikon Makernote", "Shooting Mode"),
+                    Locator("Olympus Camera Settings", "Drive Mode"),
                 }) ?? "n/a";
+                if (shootingMode == "n/a" && camera == "GFX100S")
+                {
+                    var driveMode = GetInt32Value(directories, new[] {
+                        RawLocator("Fujifilm Makernote", 0x1103),
+                    });
+                    switch (driveMode)
+                    {
+                        case 0:
+                            shootingMode = "Single";
+                            break;
+                        case 1:
+                            shootingMode = "Continuous Low";
+                            break;
+                        case 2:
+                            shootingMode = "Continuous High";
+                            break;
+                    }
+                    var bracketing = GetStringValue(directories, new[]
+                    {
+                        Locator("Fujifilm Makernote", "Auto Bracketing"),
+                    }) ?? "n/a";
+                    if (bracketing != "n/a" && bracketing != "Off")
+                    {
+                        if (shootingMode == "n/a")
+                        {
+                            shootingMode = "Auto Bracketing";
+                        }
+                        else
+                        {
+                            shootingMode += ", Auto Bracketing";
+                        }
+                    }
+                }
 
                 var dateTimeOriginal = GetStringValue(directories, new[] {
                     Locator("Exif SubIFD", "Date/Time Original"),
@@ -515,6 +554,23 @@ namespace ImageDetailsCore
                     if (decimalValue < 1)
                     {
                         shutterSpeed = string.Format("1/{0}s", 1 / decimalValue);
+                    }
+                }
+
+                // Fix up focal length
+                if (focalLength35 == "n/a" && camera == "OM SYSTEM OM-1")
+                {
+                    focalLength35 = (float.Parse(focalLength[..^2]) * 2).ToString(".#") + "mm";
+                }
+                if (focalLength != "n/a" && focalLength35 != "n/a")
+                {
+                    var focalLengthValue = float.Parse(focalLength[..^2]);
+                    var focalLength35Value = float.Parse(focalLength35[..^2]);
+                    // If the camera specified a focal length within a small margin either way, consider them
+                    // the same to avoid silly display of same value.
+                    if (focalLength35Value > focalLengthValue - 0.95 && focalLength35Value < focalLengthValue + 0.95)
+                    {
+                        focalLength35 = focalLength;
                     }
                 }
 
@@ -626,6 +682,13 @@ namespace ImageDetailsCore
                         }
                     }
                 }
+
+                // Fix up shooting mode
+                shootingMode = RemoveStringTerms(shootingMode, new List<string>()
+                {
+                    "pc control",
+                    ">shot ",
+                });
 
                 if (options.WarnMissingValues)
                 {
@@ -746,7 +809,14 @@ namespace ImageDetailsCore
                         imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 73, System.IO.Path.Combine(imageLocation, @"lens.png"), "LENS", lens, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
 
                         // Draw the focal length
-                        imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 106, System.IO.Path.Combine(imageLocation, @"ruler.png"), "FOCAL LENGTH", focalLength, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                        if (focalLength35 != "n/a" && focalLength35 != focalLength)
+                        {
+                            imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 106, System.IO.Path.Combine(imageLocation, @"ruler.png"), "FOCAL LENGTH", string.Format("{0} ({1} @ 35mm)", focalLength, focalLength35), FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                        }
+                        else
+                        {
+                            imageContext = DrawValue(imageContext, drawingScale, 11, 28, 28, 106, System.IO.Path.Combine(imageLocation, @"ruler.png"), "FOCAL LENGTH", focalLength, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
+                        }
 
                         // Draw the ISO
                         imageContext = DrawValue(imageContext, drawingScale, 11, 28, 220, 106, System.IO.Path.Combine(imageLocation, @"film.png"), "ISO", iso, FontStyle.Regular, theme.ForegroundColor, theme.LabelColor);
@@ -833,6 +903,32 @@ namespace ImageDetailsCore
             }
         }
 
+        private static string RemoveStringTerms(string stringValue, IEnumerable<string> terms)
+        {
+            var stringTerms = stringValue.Split(',', StringSplitOptions.TrimEntries);
+            foreach (var term in terms)
+            {
+                if (term[0] == '>')
+                {
+                    stringTerms = stringTerms.Where(part => !part.ToLower().StartsWith(term[1..])).ToArray<string>();
+                }
+                else if (term[0] == '<')
+                {
+                    stringTerms = stringTerms.Where(part => !part.ToLower().EndsWith(term[1..])).ToArray<string>();
+                }
+                else
+                {
+                    stringTerms = stringTerms.Where(part => !part.ToLower().Equals(term)).ToArray<string>();
+                }
+            }
+            stringValue = string.Join(", ", stringTerms);
+            if (string.IsNullOrEmpty(stringValue))
+            {
+                stringValue = "n/a";
+            }
+            return stringValue;
+        }
+
         private static IImageProcessingContext DrawValue(
             IImageProcessingContext imageContext,
             int drawingScale,
@@ -895,6 +991,12 @@ namespace ImageDetailsCore
             public string Tag { get; set; }
         }
 
+        class RawTagLocator
+        {
+            public string Directory { get; set; }
+            public Int32 Tag { get; set; }
+        }
+
         private static string GetStringValue(IEnumerable<MetadataExtractor.Directory> directories, IEnumerable<TagLocator> tagLocators)
         {
             foreach (var locator in tagLocators)
@@ -913,6 +1015,29 @@ namespace ImageDetailsCore
                 }
             }
             return null;
+        }
+
+        private static int GetInt32Value(IEnumerable<MetadataExtractor.Directory> directories, IEnumerable<RawTagLocator> tagLocators)
+        {
+            foreach (var locator in tagLocators)
+            {
+                var locatedDirectories = directories.Where(directory => directory.Name == locator.Directory);
+                foreach (var directory in locatedDirectories)
+                {
+                    if (directory != null)
+                    {
+                        try
+                        {
+                            return directory.GetInt32(locator.Tag);
+                        }
+                        catch
+                        {
+                            return int.MaxValue;
+                        }
+                    }
+                }
+            }
+            return int.MaxValue;
         }
 
         private static IPathCollection BuildCorners(int imageWidth, int imageHeight, float cornerRadius)
