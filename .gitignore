@@ -9,4 +9,8 @@
 *.RAF
 *.ORF
 *.CR2
+ImageDetailsCore-linux
+ImageDetailsCore-mac
+ImageDetailsCore.exe
 Thumbs.db
+badgeall.sh

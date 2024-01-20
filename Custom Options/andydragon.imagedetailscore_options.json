@@ -15,6 +15,7 @@
   "cameras": [
     { "source": "OLYMPUS E-500",          "display": "OLYMPUS E-500" },
     { "source": "E-500",                  "display": "OLYMPUS E-500" },
+    { "source": "OM-1",                   "display": "OM SYSTEM OM-1" },
     { "source": "OM-1            ",       "display": "OM SYSTEM OM-1" },
 
     { "source": "NIKON D5200",            "display": "NIKON D5200" },
@@ -33,11 +34,15 @@
     { "source": "NIKON Z8",               "display": "NIKON Z8" },
     { "source": "Z 8",                    "display": "NIKON Z8" },
 
-    { "source": "GFX100S",                "display": "Fujifilm GFX100S" },
+    { "source": "GFX100S",                "display": "FUJIFILM GFX100S" },
 
     { "source": "1200HD",                 "display": "SEA & SEA 1200HD" },
 
-    { "source": "6MP-9FS",                "display": "INTOVA 6MP" }
+    { "source": "6MP-9FS",                "display": "INTOVA 6MP" },
+
+    { "source": "iPhone 14 Pro",          "display": "APPLE iPhone 14 Pro" },
+    { "source": "iPhone 8 Plus",          "display": "APPLE iPhone 8 Plus" },
+    { "source": "iPhone 7",               "display": "APPLE iPhone 7" }
   ],
   "lenses": [
     { "source": "NIKKOR Z 85mm f/1.8 S",                            "display": "NIKKOR Z 85mm f/1.8 S" },
@@ -57,6 +62,7 @@
     { "source": "NIKKOR Z 180-600mm f/5.6-6.3 VR Z TC-2.0x",        "display": "NIKKOR Z 180-600mm f/5.6-6.3 VR + 2.0x TC" },
 
     { "source": "200-500mm f/5.6",                                  "display": "NIKKOR AF-S 200-500mm f/5.6E ED VR" },
+    { "source": "VR 200-500mm f/5.6E",                              "display": "NIKKOR AF-S 200-500mm f/5.6E ED VR" },
     { "source": "NIKKOR 200-500mm f/5.6E ED VR",                    "display": "NIKKOR AF-S 200-500mm f/5.6E ED VR" },
     { "source": "Nikon AF-S Nikkor 200-500mm f/5.6E ED VR",         "display": "NIKKOR AF-S 200-500mm f/5.6E ED VR" },
 
@@ -111,6 +117,10 @@
     { "source": "SIGMA 20mm f/1.4 DG HSM A015",                     "display": "SIGMA 20mm f/1.4 DG HSM ART" },
     { "source": "Sigma 200mm F1.4 DG HSM ART",                      "display": "SIGMA 20mm f/1.4 DG HSM ART" },
 
+    { "source": "Venus Laowa 25mm f/2.8 2.5-5X Ultra-Macro",        "display": "VENUS LAOWA 25mm f/2.8 2.5-5X Ultra-Macro" },
+
+    { "source": "Olympus M.Zuiko Digital 14-42mm F3.5-5.6 II",      "display": "OLYMPUS M.Zuiko 14-42mm f/3.5-5.6 II" },
+
     { "source": "14.0-45.0 mm f/3.5-5.6",                           "display": "OLYMPUS M.Zuiko 14-45mm f/3.5-5.6" },
     { "source": "Olympus Zuiko Digital 14-45mm f/3.5-5.6",          "display": "OLYMPUS M.Zuiko 14-45mm f/3.5-5.6" },
     { "source": "OLYMPUS 14-45mm Lens",                             "display": "OLYMPUS M.Zuiko 14-45mm f/3.5-5.6" },
@@ -129,7 +139,18 @@
 
     { "source": "GF110mmF2 R LM WR",                                "display": "FUJINON GF 1104mm f/2 R LM WR" },
 
-    { "source": "T2",                                               "display": "Celestron NexStar 130SLT with T2" },
-    { "source": "Celestron NexStar 130SLT with T2",                 "display": "Celestron NexStar 130SLT with T2" }
+    { "source": "T2",                                               "display": "CELESTRON NexStar 130SLT with T2" },
+    { "source": "Celestron NexStar 130SLT with T2",                 "display": "CELESTRON NexStar 130SLT with T2" },
+
+    { "source": "iPhone 14 Pro back triple camera 6.86mm f/1.78",   "display": "APPLE iPhone 14 Pro back camera (6.86mm f/1.78)" },
+    { "source": "iPhone 14 Pro back triple camera 2.22mm f/2.2",    "display": "APPLE iPhone 14 Pro back camera (2.22mm f/2.2)" },
+
+    { "source": "iPhone 8 Plus back dual camera 3.99mm f/1.8",      "display": "APPLE iPhone 8 Plus back camera (3.99mm f/1.8)" },
+    { "source": "iPhone 8 Plus back dual camera 6.6mm f/2.8",       "display": "APPLE iPhone 8 Plus back camera (6.6mm f/2.8)" },
+    { "source": "iPhone 8 Plus back camera 3.99mm f/1.8",           "display": "APPLE iPhone 8 Plus back camera (3.99mm f/1.8)" },
+    { "source": "iPhone 8 Plus back camera 6.6mm f/2.8",            "display": "APPLE iPhone 8 Plus back camera (6.6mm f/2.8)" },
+    { "source": "iPhone 8 Plus front camera 2.87mm f/2.2",          "display": "APPLE iPhone 8 Plus front camera (2.87mm f/2.2)" },
+
+    { "source": "iPhone 7 back camera 3.99mm f/1.8",                "display": "APPLE iPhone 7 back camera (3.99mm f/1.8)" }
   ]
 }
